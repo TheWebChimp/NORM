@@ -1,5 +1,14 @@
 <?php
-	class CROOD {
+	/**
+	 * CROOD
+	 *
+	 * Provides the abstraction layer for the Single classes.
+	 *
+	 * @version  1.0
+	 * @author   Rodrigo Tejero <rodrigo.tejero@thewebchi.mp> & Raul Vera <raul.vera@thewebchi.mp>
+	 * @license  MIT
+	 */
+	class CROOD extends Model {
 
 		protected $table;
 		protected $table_fields;
@@ -13,7 +22,7 @@
 		protected $meta_id;
 		protected $meta_table;
 
-		function init() {
+		function init($args = false) {
 
 			$this->id = 					0;
 
@@ -60,7 +69,7 @@
 				$ret = $this->id;
 
 			} catch (PDOException $e) {
-				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$class_name}::count(): {$e->getMessage()}" );
+				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::count(): {$e->getMessage()}", 'crood' );
 			}
 			return $ret;
 		}
@@ -76,12 +85,13 @@
 
 			try {
 				$sql = "DELETE FROM {$this->table} WHERE id = :id";
+
 				$stmt = $dbh->prepare($sql);
 				$stmt->bindValue(':id', $this->id);
 				$stmt->execute();
 				$ret = true;
 			} catch (PDOException $e) {
-				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$class_name}::count(): {$e->getMessage()}" );
+				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::count(): {$e->getMessage()}.", 'crood' );
 			}
 			return $ret;
 		}
@@ -138,7 +148,7 @@
 					}
 				}
 			} catch (PDOException $e) {
-				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$class_name}::count(): {$e->getMessage()}" );
+				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::count(): {$e->getMessage()}", 'crood' );
 			}
 			return $ret;
 		}
@@ -161,7 +171,7 @@
 				}
 
 			} catch (PDOException $e) {
-				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$class_name}::count(): {$e->getMessage()}" );
+				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::count(): {$e->getMessage()}", 'crood' );
 			}
 			return (object) $ret;
 		}
@@ -185,7 +195,7 @@
 					$ret = true;
 				}
 			} catch (PDOException $e) {
-				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$class_name}::count(): {$e->getMessage()}" );
+				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::count(): {$e->getMessage()}", 'crood' );
 			}
 			return $ret;
 		}
@@ -219,7 +229,7 @@
 					$ret = true;
 
 				} catch (PDOException $e) {
-					log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$class_name}::count(): {$e->getMessage()}" );
+					log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::count(): {$e->getMessage()}", 'crood' );
 				}
 			}
 

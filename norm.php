@@ -1,4 +1,13 @@
 <?php
+	/**
+	 * NORM
+	 *
+	 * Provides the abstraction layer for the Plural classes.
+	 *
+	 * @version  1.0
+	 * @author   Rodrigo Tejero <rodrigo.tejero@thewebchi.mp> & Raul Vera <raul.vera@thewebchi.mp>
+	 * @license  MIT
+	 */
 	class NORM {
 
 		protected static $table;
