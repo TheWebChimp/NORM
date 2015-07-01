@@ -44,9 +44,9 @@
 			$dbh = $site->getDatabase();
 			$ret = false;
 
-			$table_fields = querify($this->table_fields);
-			$bind_fields = querify($this->table_fields, 'bind');
-			$param_fields = querify($this->update_fields, 'param');
+			$table_fields = $this->querify($this->table_fields);
+			$bind_fields = $this->querify($this->table_fields, 'bind');
+			$param_fields = $this->querify($this->update_fields, 'param');
 
 			try {
 				# Create or update user
@@ -56,7 +56,7 @@
 
 				$stmt = $dbh->prepare($sql);
 
-				foreach($table_fields as $table_field) {
+				foreach($this->table_fields as $table_field) {
 					$stmt->bindValue(":{$table_field}", $this->$table_field);
 				}
 
@@ -69,7 +69,7 @@
 				$ret = $this->id;
 
 			} catch (PDOException $e) {
-				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::count(): {$e->getMessage()}", 'crood' );
+				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::" . __FUNCTION__ . ": {$e->getMessage()}. Query: {$sql}", 'crood' );
 			}
 			return $ret;
 		}
@@ -91,7 +91,7 @@
 				$stmt->execute();
 				$ret = true;
 			} catch (PDOException $e) {
-				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::count(): {$e->getMessage()}.", 'crood' );
+				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::" . __FUNCTION__ . ": {$e->getMessage()}.", 'crood' );
 			}
 			return $ret;
 		}
@@ -106,20 +106,27 @@
 		 * @return string         String with all the fields imploded for querying
 		 */
 		public function querify($fields, $action = false) {
+
+			$ret = array();
+
 			if ($action == 'bind') {
 				foreach ($fields as $field) {
-					$field = ":{$field}";
+					$ret[] = ":{$field}";
 				}
 			}
 
 			else if($action == 'param') {
-
 				foreach ($fields as $field) {
-					$field = "{$field} = :{$field}";
+					$ret[] = "{$field} = :{$field}";
 				}
 			}
 
-			return implode(', ', $fields);
+			else {
+
+				$ret = $fields;
+			}
+
+			return implode(', ', $ret);
 		}
 
 		/*  __  ___     __        __  ___          __     __
@@ -148,7 +155,7 @@
 					}
 				}
 			} catch (PDOException $e) {
-				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::count(): {$e->getMessage()}", 'crood' );
+				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::" . __FUNCTION__ . ": {$e->getMessage()}", 'crood' );
 			}
 			return $ret;
 		}
@@ -171,7 +178,7 @@
 				}
 
 			} catch (PDOException $e) {
-				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::count(): {$e->getMessage()}", 'crood' );
+				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::" . __FUNCTION__ . ": {$e->getMessage()}", 'crood' );
 			}
 			return (object) $ret;
 		}
@@ -195,7 +202,7 @@
 					$ret = true;
 				}
 			} catch (PDOException $e) {
-				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::count(): {$e->getMessage()}", 'crood' );
+				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::" . __FUNCTION__ . ": {$e->getMessage()}", 'crood' );
 			}
 			return $ret;
 		}
@@ -229,7 +236,7 @@
 					$ret = true;
 
 				} catch (PDOException $e) {
-					log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::count(): {$e->getMessage()}", 'crood' );
+					log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::" . __FUNCTION__ . ": {$e->getMessage()}.", 'crood' );
 				}
 			}
 

@@ -78,20 +78,26 @@
 		 * @return string         String with all the fields imploded for querying
 		 */
 		public static function querify($fields, $action = false) {
+			$ret = array();
+
 			if ($action == 'bind') {
 				foreach ($fields as $field) {
-					$field = ":{$field}";
+					$ret[] = ":{$field}";
 				}
 			}
 
-			else if($action == 'params') {
-
+			else if($action == 'param') {
 				foreach ($fields as $field) {
-					$field = "{$field} = :{$field}";
+					$ret[] = "{$field} = :{$field}";
 				}
 			}
 
-			return implode(', ', $fields);
+			else {
+
+				$ret = $fields;
+			}
+
+			return implode(', ', $ret);
 		}
 
 		/**
