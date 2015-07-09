@@ -41,7 +41,7 @@ html, body {
 	text-align: center;
 }
 
-.form-code {
+form {
 
 	margin-bottom: 15px;
 }
@@ -50,6 +50,17 @@ html, body {
 
 	border: 2px solid #B2DFDB;
 	margin-bottom: 0;
+}
+
+.codemirror {
+
+	margin-bottom: 0;
+}
+
+.CodeMirror {
+
+	height: auto;
+	min-height: 400px;
 }
 
 @media (min-width: 1000px) {
@@ -74,7 +85,7 @@ html, body {
 		float: right;
 	}
 
-	.form-code {
+	form {
 
 		margin-bottom: 0;
 	}
@@ -82,5 +93,11 @@ html, body {
 	.box-output {
 
 		overflow: auto;
+	}
+
+	.CodeMirror {
+
+		height: auto;
+		min-height: 735px;
 	}
 }
