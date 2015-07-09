@@ -37,7 +37,7 @@
 			else {
 
 				//Fetch metas
-				if(in_array('fetch_metas', $args)) {
+				if (is_array($args) && in_array('fetch_metas', $args)) {
 
 					$this->metas = $this->getMetas();
 				}
