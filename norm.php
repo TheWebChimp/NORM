@@ -27,6 +27,7 @@
 
 				$options = array();
 				$field = substr($method, 5);
+				$field = camel_to_snake($field);
 				$options['conditions'] = "{$field} = '{$params[0]}'";
 
 				if ( isset($params[1]) && is_array($params) )
@@ -39,6 +40,7 @@
 
 				$options = array();
 				$field = substr($method, 7);
+				$field = camel_to_snake($field);
 				$options['conditions'] = "{$field} LIKE '%{$params[0]}%'";
 
 				if ( isset($params[1]) && is_array($params) )
@@ -51,6 +53,7 @@
 
 				$options = array();
 				$field = substr($method, 5);
+				$field = camel_to_snake($field);
 				$options['conditions'] = "{$field} = '{$params[0]}'";
 
 				if ( isset($params[1]) && is_array($params) )
@@ -63,6 +66,7 @@
 
 				$options = array();
 				$field = substr($method, 7);
+				$field = camel_to_snake($field);
 				$options['conditions'] = "{$field} LIKE '%{$params[0]}%'";
 
 				if ( isset($params[1]) && is_array($params) )
