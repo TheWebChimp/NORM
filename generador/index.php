@@ -1,5 +1,23 @@
 <?php
 
+	$table_name = '';
+	$version = '';
+
+	$singular_class_name = '';
+	$singular_class_description = '';
+
+	$plural_class_name = '';
+	$plural_class_description = '';
+
+	$author_name = '';
+	$author_email = '';
+
+	$meta_id = '';
+	$meta_table = '';
+
+	$table_fields = '';
+	$update_fields = '';
+
 	if($_POST) {
 
 		//Grabbing the template
@@ -66,7 +84,12 @@
 
 			$field = trim($field);
 			$value = $field == 'id' ? 0 : "''";
-			$attr_default_values .= "\$this->{$field} = {$value};\n\t\t\t\t";
+
+			if($field == 'created' || $field == 'modified')
+				$attr_default_values .= "\$this->{$field} = \$now;\n\t\t\t\t";
+
+			else
+				$attr_default_values .= "\$this->{$field} = {$value};\n\t\t\t\t";
 		}
 
 		$attr_default_values = trim($attr_default_values);
@@ -138,14 +161,14 @@
 							<div class="col col-8">
 								<div class="form-group">
 									<label for="table_name" class="control-label">Nombre de la tabla <span class="required">*</span></label>
-									<input id="table_name" type="text" class="form-control input-block" name="table_name">
+									<input id="table_name" type="text" class="form-control input-block" name="table_name" value="<?php echo $table_name; ?>">
 								</div>
 							</div>
 
 							<div class="col col-4">
 								<div class="form-group">
 									<label for="version" class="control-label">Versión <span class="required">*</span></label>
-									<input id="version" type="text" class="form-control input-block" name="version">
+									<input id="version" type="text" class="form-control input-block" name="version" value="<?php echo $version; ?>">
 								</div>
 							</div>
 						</div>
@@ -154,14 +177,14 @@
 							<div class="col col-6">
 								<div class="form-group">
 									<label for="singular_class_name" class="control-label">Nombre de Clase Singular <span class="required">*</span></label>
-									<input id="singular_class_name" type="text" class="form-control input-block" name="singular_class_name">
+									<input id="singular_class_name" type="text" class="form-control input-block" name="singular_class_name" value="<?php echo $singular_class_name; ?>">
 								</div>
 							</div>
 
 							<div class="col col-6">
 								<div class="form-group">
 									<label for="plural_class_name" class="control-label">Nombre de Clase Plural <span class="required">*</span></label>
-									<input id="plural_class_name" type="text" class="form-control input-block" name="plural_class_name">
+									<input id="plural_class_name" type="text" class="form-control input-block" name="plural_class_name" value="<?php echo $plural_class_name; ?>">
 								</div>
 							</div>
 						</div>
@@ -170,14 +193,14 @@
 							<div class="col col-6">
 								<div class="form-group">
 									<label for="singular_class_description" class="control-label">Descripción de Clase Singular <span class="required">*</span></label>
-									<input id="singular_class_description" type="text" class="form-control input-block" name="singular_class_description">
+									<input id="singular_class_description" type="text" class="form-control input-block" name="singular_class_description" value="<?php echo $singular_class_description; ?>">
 								</div>
 							</div>
 
 							<div class="col col-6">
 								<div class="form-group">
 									<label for="plural_class_description" class="control-label">Descripción de Clase Plural <span class="required">*</span></label>
-									<input id="plural_class_description" type="text" class="form-control input-block" name="plural_class_description">
+									<input id="plural_class_description" type="text" class="form-control input-block" name="plural_class_description" value="<?php echo $plural_class_description; ?>">
 								</div>
 							</div>
 						</div>
@@ -187,14 +210,14 @@
 							<div class="col col-6">
 								<div class="form-group">
 									<label for="author_name" class="control-label">Nombre</label>
-									<input id="author_name" type="text" class="form-control input-block" name="author_name">
+									<input id="author_name" type="text" class="form-control input-block" name="author_name" value="<?php echo $author_name; ?>">
 								</div>
 							</div>
 
 							<div class="col col-6">
 								<div class="form-group">
 									<label for="author_email" class="control-label">Email</label>
-									<input id="author_email" type="text" class="form-control input-block" name="author_email">
+									<input id="author_email" type="text" class="form-control input-block" name="author_email" value="<?php echo $author_email; ?>">
 								</div>
 							</div>
 						</div>
@@ -204,14 +227,14 @@
 							<div class="col col-6">
 								<div class="form-group">
 									<label for="meta_id" class="control-label">Columna de ID <span class="required">*</span></label>
-									<input id="meta_id" type="text" class="form-control input-block" name="meta_id">
+									<input id="meta_id" type="text" class="form-control input-block" name="meta_id" value="<?php echo $meta_id; ?>">
 								</div>
 							</div>
 
 							<div class="col col-6">
 								<div class="form-group">
 									<label for="meta_table" class="control-label">Nombre de la Tabla <span class="required">*</span></label>
-									<input id="meta_table" type="text" class="form-control input-block" name="meta_table">
+									<input id="meta_table" type="text" class="form-control input-block" name="meta_table" value="<?php echo $meta_table; ?>">
 								</div>
 							</div>
 						</div>
@@ -219,12 +242,12 @@
 						<h3>Campos</h3>
 						<div class="form-group">
 							<label for="table_fields" class="control-label">Campos de la tabla (uno por linea)</label>
-							<textarea id="table_fields" type="text" class="form-control input-block" name="table_fields"></textarea>
+							<textarea id="table_fields" type="text" class="form-control input-block" name="table_fields"><?php echo $table_fields; ?></textarea>
 						</div>
 
 						<div class="form-group">
 							<label for="update_fields" class="control-label">Campos de actualizacion (uno por linea)</label>
-							<textarea id="update_fields" type="text" class="form-control input-block" name="update_fields"></textarea>
+							<textarea id="update_fields" type="text" class="form-control input-block" name="update_fields"><?php echo $update_fields; ?></textarea>
 						</div>
 
 						<div class="form-actions">

@@ -18,6 +18,8 @@
 		 */
 		function init($args = false) {
 
+			$now = date('Y-m-d H:i:s');
+
 			$this->table = 					'%table_name%';
 			$this->table_fields = 			array(%table_fields%);
 			$this->update_fields = 			array(%update_fields%);
