@@ -117,7 +117,9 @@
 
 			else if($action == 'param') {
 				foreach ($fields as $field) {
-					$ret[] = "{$field} = :{$field}";
+
+					if($field == 'modified') 	$ret[] = "{$field} = NOW()";
+					else 						$ret[] = "{$field} = :field";
 				}
 			}
 
