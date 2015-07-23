@@ -30,8 +30,16 @@
 				$field = camel_to_snake($field);
 				$options['conditions'] = "{$field} = '{$params[0]}'";
 
-				if ( isset($params[1]) && is_array($params) )
+				if ( isset($params[1]) && is_array($params) ){
+
+					if(isset($params[1]['conditions'])) {
+
+						$options['conditions'] .= $params[1]['conditions'];
+						unset($params[1]['conditions']);
+					}
+
 					$options = array_merge($options, $params[1]);
+				}
 
 				return self::get($options);
 			}
@@ -43,8 +51,16 @@
 				$field = camel_to_snake($field);
 				$options['conditions'] = "{$field} LIKE '%{$params[0]}%'";
 
-				if ( isset($params[1]) && is_array($params) )
+				if ( isset($params[1]) && is_array($params) ){
+
+					if(isset($params[1]['conditions'])) {
+
+						$options['conditions'] .= $params[1]['conditions'];
+						unset($params[1]['conditions']);
+					}
+
 					$options = array_merge($options, $params[1]);
+				}
 
 				return self::get($options);
 			}
@@ -56,8 +72,16 @@
 				$field = camel_to_snake($field);
 				$options['conditions'] = "{$field} = '{$params[0]}'";
 
-				if ( isset($params[1]) && is_array($params) )
+				if ( isset($params[1]) && is_array($params) ){
+
+					if(isset($params[1]['conditions'])) {
+
+						$options['conditions'] .= $params[1]['conditions'];
+						unset($params[1]['conditions']);
+					}
+
 					$options = array_merge($options, $params[1]);
+				}
 
 				return self::all($options);
 			}
@@ -69,8 +93,16 @@
 				$field = camel_to_snake($field);
 				$options['conditions'] = "{$field} LIKE '%{$params[0]}%'";
 
-				if ( isset($params[1]) && is_array($params) )
+				if ( isset($params[1]) && is_array($params) ){
+
+					if(isset($params[1]['conditions'])) {
+
+						$options['conditions'] .= $params[1]['conditions'];
+						unset($params[1]['conditions']);
+					}
+
 					$options = array_merge($options, $params[1]);
+				}
 
 				return self::all($options);
 			}
