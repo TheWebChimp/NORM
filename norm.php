@@ -202,8 +202,14 @@
 			$page =			get_item($options, 'page', 1);
 			$sort =			get_item($options, 'sort', 'asc');
 			$by =			get_item($options, 'by', 'id');
+			$group =		get_item($options, 'group', '');
+
 			$conditions =	get_item($options, 'conditions', '');
 			$pdoargs =		get_item($options, 'pdoargs', array());
+
+			$debug =		get_item($options, 'debug', false);
+			$code =			get_item($options, 'code', false);
+			$query =		get_item($options, 'query', false);
 
 			$offset = $show * ($page - 1);
 
@@ -213,22 +219,32 @@
 			$sort =		strtoupper($sort);
 			$offset =	is_numeric($offset) ? $offset : false;
 			$show =		is_numeric($show) ? $show : false;
+			$group =	in_array($group, $table_fields) ? $group : false;
 
-			if ($by === false || $sort === false || $offset === false || $show === false) {
+			if ($group === false || $by === false || $sort === false || $offset === false || $show === false) {
 
-				log_to_file('Parameter Error: by, sort, offset or show not well defined. (Line' . __FILE__ . ')', 'norm');
+				log_to_file('Parameter Error: by, group, sort, offset or show not well defined. (Line' . __FILE__ . ')', 'norm');
 				return $ret;
 			}
+
+			$group = 	$group ? "GROUP BY {$group}" : '';
 
 			$conditions = $conditions ? "WHERE {$conditions}" : '';
 
 			try {
-				$sql = "SELECT {$query_fields} FROM {$table} {$conditions} ORDER BY {$by} {$sort} LIMIT {$offset}, {$show};";
+
+				$sql = $query ? $query : "SELECT {$query_fields} FROM {$table} {$conditions} {$group} ORDER BY {$by} {$sort} LIMIT {$offset}, {$show}";
+
+				if($debug) echo $sql;
+				if($code) return $sql;
+
 				$stmt = $dbh->prepare($sql);
 				$stmt->execute();
 				$stmt->setFetchMode(PDO::FETCH_CLASS, static::$singular_class_name, $pdoargs);
 				$ret = $stmt->fetchAll();
+
 			} catch (PDOException $e) {
+
 				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$class_name}::all(): {$e->getMessage()}", 'norm' );
 			}
 			return $ret;
