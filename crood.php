@@ -121,14 +121,69 @@
 					if($field == 'modified') 	$ret[] = "{$field} = NOW()";
 					else 						$ret[] = "{$field} = :{$field}";
 				}
+			} else { $ret = $fields; }
+
+			return implode(', ', $ret);
+		}
+
+		/*  ____      _ __     ____                 __  _
+		   /  _/___  (_) /_   / __/_  ______  _____/ /_(_)___  ____  _____
+		   / // __ \/ / __/  / /_/ / / / __ \/ ___/ __/ / __ \/ __ \/ ___/
+		 _/ // / / / / /_   / __/ /_/ / / / / /__/ /_/ / /_/ / / / (__  )
+		/___/_/ /_/_/\__/  /_/  \__,_/_/ /_/\___/\__/_/\____/_/ /_/____/
+		                                                                   */
+
+		protected function preInit($args = false) {
+
+			if(is_array($args)) {
+
+				$is_assoc = is_array($args) ? array_keys($args) !== range(0, count($args) - 1) : false;
+
+				if($is_assoc) {
+
+					if( array_key_exists('fetch_metas', $args) ) {
+						$this->fetchMetas();
+					}
+
+					if( array_key_exists('expand', $args) ) {
+						$this->expand($args['expand']);
+					}
+				}
+			}
+		}
+
+		protected function postInit($args = false) { }
+
+		/* Auxiliar functions */
+		/* -------------------------------------------------------------------------------------- */
+
+		public function fetchMetas() {
+
+			$this->metas = $this->getMetas();
+		}
+
+		public function expand($args) {
+
+			if( is_array($args) ) {
+
+				foreach ($args as $prop => $opts) {
+
+					$local = get_item($opts, 'local', 'id');
+					$foreign = get_item($opts, 'foreign');
+					$model = get_item($opts, 'model');
+					$method = get_item($opts, 'method', 'all');
+					$params = get_item($opts, 'params', array());
+
+					$call = "{$method}By" . snake_to_camel($foreign);
+
+					$this->$prop = $model::$call($this->$local, $params);
+				}
 			}
 
 			else {
 
-				$ret = $fields;
+				throw new Exception('Expand args must be an associative array.');
 			}
-
-			return implode(', ', $ret);
 		}
 
 		/*  __  ___     __        __  ___          __     __

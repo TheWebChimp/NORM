@@ -240,7 +240,7 @@
 
 				$stmt = $dbh->prepare($sql);
 				$stmt->execute();
-				$stmt->setFetchMode(PDO::FETCH_CLASS, static::$singular_class_name, $pdoargs);
+				$stmt->setFetchMode(PDO::FETCH_CLASS, static::$singular_class_name, array($pdoargs));
 				$ret = $stmt->fetchAll();
 
 			} catch (PDOException $e) {
