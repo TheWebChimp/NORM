@@ -55,7 +55,7 @@
 	 * %plural_class_description%
 	 *
 	 * @version 1.0
-	 * @author  Raul Vera <raul.vera@thewebchi.mp>
+	 * @author  %author_name% <%author_email%>
 	 */
 	class %plural_class_name% extends NORM {
 

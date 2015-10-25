@@ -4,7 +4,7 @@
 	 *
 	 * Provides the abstraction layer for the Single classes.
 	 *
-	 * @version  1.0
+	 * @version  1.2
 	 * @author   Rodrigo Tejero <rodrigo.tejero@thewebchi.mp> & Raul Vera <raul.vera@thewebchi.mp>
 	 * @license  MIT
 	 */
@@ -22,20 +22,7 @@
 		protected $meta_id;
 		protected $meta_table;
 
-		function init($args = false) {
-
-			$this->id = 					0;
-
-			$this->table = 					null;
-			$this->table_fields = 			null;
-			$this->update_fields = 			null;
-			$this->singular_class_name = 	null;
-			$this->plural_class_name = 		null;
-
-			# MetaModel
-			$this->meta_table = 			null;
-			$this->meta_id = 				null;
-		}
+		function init($args = false) { }
 
 		# Create & Update
 		function save() {

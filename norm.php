@@ -23,7 +23,7 @@
 		 */
 		public static function __callStatic($method, $params) {
 
-			if ( substr($method, 0, 5) == 'getBy' ) {
+			if( substr($method, 0, 5) == 'getBy' ) {
 
 				$options = array();
 				$field = substr($method, 5);
@@ -44,7 +44,7 @@
 				return self::get($options);
 			}
 
-			else if ( substr($method, 0, 7) == 'getLike' ) {
+			else if( substr($method, 0, 7) == 'getLike' ) {
 
 				$options = array();
 				$field = substr($method, 7);
@@ -65,7 +65,7 @@
 				return self::get($options);
 			}
 
-			else if ( substr($method, 0, 5) == 'allBy' ) {
+			else if( substr($method, 0, 5) == 'allBy' ) {
 
 				$options = array();
 				$field = substr($method, 5);
@@ -86,7 +86,7 @@
 				return self::all($options);
 			}
 
-			else if ( substr($method, 0, 7) == 'allLike' ) {
+			else if( substr($method, 0, 7) == 'allLike' ) {
 
 				$options = array();
 				$field = substr($method, 7);
@@ -116,7 +116,7 @@
 		public static function querify($fields, $action = false) {
 			$ret = array();
 
-			if ($action == 'bind') {
+			if($action == 'bind') {
 				foreach ($fields as $field) {
 					$ret[] = ":{$field}";
 				}
@@ -128,10 +128,7 @@
 				}
 			}
 
-			else {
-
-				$ret = $fields;
-			}
+			else { $ret = $fields; }
 
 			return implode(', ', $ret);
 		}
@@ -221,7 +218,7 @@
 			$show =		is_numeric($show) ? $show : false;
 			$group =	in_array($group, $table_fields) ? $group : false;
 
-			if ($group === false || $by === false || $sort === false || $offset === false || $show === false) {
+			if ($by === false || $sort === false || $offset === false || $show === false) {
 
 				log_to_file('Parameter Error: by, group, sort, offset or show not well defined. (Line' . __FILE__ . ')', 'norm');
 				return $ret;
