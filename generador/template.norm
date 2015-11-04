@@ -38,11 +38,16 @@
 
 			else {
 
-				//Fetch metas
-				if (is_array($args) && in_array('fetch_metas', $args)) {
+				$args = $this->preInit($args);
 
-					$this->metas = $this->getMetas();
-				}
+				# Enter your logic here
+				# ----------------------------------------------------------------------------------
+
+
+
+				# ----------------------------------------------------------------------------------
+
+				$this->postInit($args);
 			}
 		}
 	}
