@@ -220,7 +220,7 @@
 
 			if ($by === false || $sort === false || $offset === false || $show === false) {
 
-				log_to_file('Parameter Error: by, group, sort, offset or show not well defined. (Line' . __FILE__ . ')', 'norm');
+				log_to_file('Parameter Error: sort, offset or show not well defined. (Line' . __LINE__ . ')', 'norm');
 				return $ret;
 			}
 
