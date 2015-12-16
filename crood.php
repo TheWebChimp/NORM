@@ -137,9 +137,11 @@
 					}
 				}
 			}
+
+			return $args;
 		}
 
-		protected function postInit($args = false) { }
+		protected function postInit($args = false) { return $args; }
 
 		/* Auxiliar functions */
 		/* -------------------------------------------------------------------------------------- */
