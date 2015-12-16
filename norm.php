@@ -23,6 +23,7 @@
 		 */
 		public static function __callStatic($method, $params) {
 
+			//Get by logic
 			if( substr($method, 0, 5) == 'getBy' ) {
 
 				$options = array();
@@ -44,6 +45,7 @@
 				return self::get($options);
 			}
 
+			//Get Like logic
 			else if( substr($method, 0, 7) == 'getLike' ) {
 
 				$options = array();
@@ -65,6 +67,7 @@
 				return self::get($options);
 			}
 
+			//All by logic
 			else if( substr($method, 0, 5) == 'allBy' ) {
 
 				$options = array();
@@ -86,6 +89,7 @@
 				return self::all($options);
 			}
 
+			//All like logic
 			else if( substr($method, 0, 7) == 'allLike' ) {
 
 				$options = array();
@@ -154,7 +158,7 @@
 				$row = $stmt->fetch();
 				$ret = $row->total;
 			} catch (PDOException $e) {
-				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$class_name}::count(): {$e->getMessage()}" );
+				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$class_name}::count(): {$e->getMessage()}", 'norm' );
 			}
 			return $ret;
 		}
@@ -226,6 +230,7 @@
 
 			$group = 	$group ? "GROUP BY {$group}" : '';
 
+			$conditions = is_array($conditions) ? implode(' AND ', $conditions) : $conditions;
 			$conditions = $conditions ? "WHERE {$conditions}" : '';
 
 			try {
