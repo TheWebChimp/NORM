@@ -192,13 +192,13 @@
 			$dbh = $site->getDatabase();
 			$ret = array();
 
-			#Generals
+			# Generals
 			$table = static::$table;
 			$table_fields = static::$table_fields;
 			$class_name = static::$plural_class_name;
 			$query_fields = static::querify(get_item($options, 'query_fields', $table_fields));
 
-			#Default variables
+			# Default variables
 			$show =			get_item($options, 'show', 1000);
 			$page =			get_item($options, 'page', 1);
 			$sort =			get_item($options, 'sort', 'asc');
@@ -232,6 +232,12 @@
 
 			$conditions = is_array($conditions) ? implode(' AND ', $conditions) : $conditions;
 			$conditions = $conditions ? "WHERE {$conditions}" : '';
+
+			# Soft Delete
+			if(in_array('deleted', $table_fields)) {
+
+				$conditions .= ($conditions = $conditions ? ' AND deleted != 1' : 'WHERE deleted != 1');
+			}
 
 			try {
 

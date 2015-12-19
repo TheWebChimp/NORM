@@ -13,6 +13,7 @@
 		protected $table;
 		protected $table_fields;
 		protected $update_fields;
+		protected $search_fields;
 		protected $singular_class_name;
 		protected $plural_class_name;
 
@@ -35,8 +36,18 @@
 			$bind_fields = $this->querify($this->table_fields, 'bind');
 			$param_fields = $this->querify($this->update_fields, 'param');
 
+			if( in_array('fts', $this->table_fields) && count($this->search_fields) ) {
+
+				$fts_fields = array();
+				foreach( $this->search_fields as $search_field ) {
+
+					$fts_fields[] = $this->$search_field;
+				}
+				$this->fts = '[' . implode('][', pieces) . ']';
+			}
+
 			try {
-				# Create or update user
+				# Create or update
 				$sql = "INSERT INTO {$this->table} ({$table_fields})
 						VALUES ({$bind_fields})
 						ON DUPLICATE KEY UPDATE {$param_fields}";
@@ -71,7 +82,15 @@
 			$ret = false;
 
 			try {
-				$sql = "DELETE FROM {$this->table} WHERE id = :id";
+
+				if(in_array('deleted', $table_fields)) {
+
+					$sql = "UPDATE {$this->table} SET deleted = 1 WHERE id = :id";
+
+				} else {
+
+					$sql = "DELETE FROM {$this->table} WHERE id = :id";
+				}
 
 				$stmt = $dbh->prepare($sql);
 				$stmt->bindValue(':id', $this->id);
