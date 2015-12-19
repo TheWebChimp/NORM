@@ -141,23 +141,33 @@
 
 		protected function preInit($args = false) {
 
-			if(is_array($args)) {
+			if(is_array($args) && isset($args[0])) {
 
-				$is_assoc = is_array($args) ? array_keys($args) !== range(0, count($args) - 1) : false;
+				$init_args = $args[0];
+				$is_assoc = is_array($init_args) ? array_keys($init_args) !== range(0, count($init_args) - 1) : false;
 
 				if($is_assoc) {
 
-					if( array_key_exists('fetch_metas', $args) ) {
+					if( array_key_exists('fetch_metas', $init_args) ) {
 						$this->fetchMetas();
 					}
 
-					if( array_key_exists('expand', $args) ) {
-						$this->expand($args['expand']);
-					}
-				}
-			}
+					if( array_key_exists('expand', $init_args) ) {
 
-			return $args;
+						$this->expand($init_args['expand']);
+					}
+
+					return $init_args;
+
+				} else {
+
+					return $args[0];
+				}
+
+			} else {
+
+				return $args;
+			}
 		}
 
 		protected function postInit($args = false) { return $args; }
