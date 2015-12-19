@@ -83,7 +83,7 @@
 
 			try {
 
-				if(in_array('deleted', $table_fields)) {
+				if(in_array('deleted', $this->table_fields)) {
 
 					$sql = "UPDATE {$this->table} SET deleted = 1 WHERE id = :id";
 
