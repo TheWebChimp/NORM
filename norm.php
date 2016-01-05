@@ -236,7 +236,7 @@
 			# Soft Delete
 			if(in_array('deleted', $table_fields)) {
 
-				$conditions .= ($conditions = $conditions ? ' AND deleted != 1' : 'WHERE deleted != 1');
+				$conditions .= ($conditions == $conditions ? ' AND deleted != 1' : 'WHERE deleted != 1');
 			}
 
 			try {
