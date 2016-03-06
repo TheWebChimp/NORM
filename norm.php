@@ -149,6 +149,7 @@
 
 			$conditions = $conditions ?: 1;
 
+
 			# Generals
 			$table = static::$table;
 			$class_name = static::$plural_class_name;
