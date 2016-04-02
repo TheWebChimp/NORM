@@ -29,7 +29,7 @@ For NORM to work, we have created a set of rules that are both practical and fun
 
 Let's say you want a system to store movies. So, to create a movie table, bases on NORM rules (more about this in a sec), your table would look like this:
 
-``` mysql
+``` sql
 CREATE TABLE `movie` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
