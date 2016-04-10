@@ -2,9 +2,7 @@
 
 	/**
 	 * %singular_class_name% Class
-	 *
-	 * %singular_class_description%
-	 *
+	 *%singular_class_description%
 	 * @version  %version%
 	 * @author   %author_name% <%author_email%>
 	 */
@@ -25,11 +23,7 @@
 			$this->update_fields = 			array(%update_fields%);
 			$this->singular_class_name = 	'%singular_class_name%';
 			$this->plural_class_name = 		'%plural_class_name%';
-
-			# MetaModel
-			$this->meta_id = 				'%meta_id%';
-			$this->meta_table = 			'%meta_table%';
-
+			%meta_model%
 
 			if (! $this->id ) {
 
@@ -56,9 +50,7 @@
 
 	/**
 	 * %plural_class_name% Class
-	 *
-	 * %plural_class_description%
-	 *
+	 *%plural_class_description%
 	 * @version 1.0
 	 * @author  %author_name% <%author_email%>
 	 */

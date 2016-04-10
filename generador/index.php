@@ -27,10 +27,10 @@
 		//Define the variables
 
 		$singular_class_name = isset($_POST['singular_class_name']) ? $_POST['singular_class_name'] : '';
-		$singular_class_description = isset($_POST['singular_class_description']) ? $_POST['singular_class_description'] : '';
+		$singular_class_description = isset($_POST['singular_class_description']) && $_POST['singular_class_description'] ? $_POST['singular_class_description'] : '';
 
 		$plural_class_name = isset($_POST['plural_class_name']) ? $_POST['plural_class_name'] : '';
-		$plural_class_description = isset($_POST['plural_class_description']) ? $_POST['plural_class_description'] : '';
+		$plural_class_description = isset($_POST['plural_class_description']) && $_POST['plural_class_description'] ? $_POST['plural_class_description'] : '';
 
 		$author_name = isset($_POST['author_name']) ? $_POST['author_name'] : 'WebChimp';
 		$author_email = isset($_POST['author_email']) ? $_POST['author_email'] : 'sistemas@thewebchi.mp';
@@ -38,8 +38,10 @@
 		$meta_id = isset($_POST['meta_id']) ? $_POST['meta_id'] : '';
 		$meta_table = isset($_POST['meta_table']) ? $_POST['meta_table'] : '';
 
+		$has_meta = $meta_id && $meta_table;
+
 		$version = isset($_POST['version']) ? $_POST['version'] : '';
-		$table_name = isset($_POST['table_name']) ? $_POST['table_name'] : '';
+		$table_name = isset($_POST['table_name']) ? strtolower($_POST['table_name']) : '';
 
 		$table_fields = isset($_POST['table_fields']) ? $_POST['table_fields'] : '';
 		$update_fields = isset($_POST['update_fields']) ? $_POST['update_fields'] : '';
@@ -84,6 +86,7 @@
 
 			$field = trim($field);
 			$value = $field == 'id' ? 0 : "''";
+			$value = strpos($field, 'id_') !== false ? 0 : "''";
 
 			if($field == 'created' || $field == 'modified')
 				$attr_default_values .= "\$this->{$field} = \$now;\n\t\t\t\t";
@@ -92,18 +95,33 @@
 				$attr_default_values .= "\$this->{$field} = {$value};\n\t\t\t\t";
 		}
 
+		if($has_meta) $attr_default_values .= "\$this->metas = new stdClass();\n\t\t\t\t";
+
 		$attr_default_values = trim($attr_default_values);
 
 		//Replacing
 
+		//Metas
+		$meta_model;
+
+		if($has_meta) {
+
+			$meta_model = '';
+			$meta_model .= "\n\n\t\t\t#metaModel\n";
+			$meta_model .= "\t\t\t\$this->meta_id = \t\t\t\t'{$meta_id}';\n";
+			$meta_model .= "\t\t\t\$this->meta_table = \t\t\t'{$meta_table}';";
+		}
+
 		$template = str_replace('%singular_class_name%', $singular_class_name, $template);
-		$template = str_replace('%singular_class_description%', $singular_class_description, $template);
+		$template = str_replace('%singular_class_description%', "\n\t * {$singular_class_description}\n\t *", $template);
 
 		$template = str_replace('%plural_class_name%', $plural_class_name, $template);
-		$template = str_replace('%plural_class_description%', $plural_class_description, $template);
+		$template = str_replace('%plural_class_description%', "\n\t * {$plural_class_description}\n\t *", $template);
 
 		$template = str_replace('%author_name%', $author_name, $template);
 		$template = str_replace('%author_email%', $author_email, $template);
+
+		$template = str_replace('%meta_model%', $meta_model, $template);
 
 		$template = str_replace('%version%', $version, $template);
 		$template = str_replace('%table_name%', $table_name, $template);
