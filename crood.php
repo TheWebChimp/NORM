@@ -153,7 +153,7 @@
 
 			//Metas
 			if(isset($this->meta_table) && $this->meta_table && (!isset($this->metas) || !$this->metas)) {
-				$this->metas = stdClass();
+				$this->metas = new stdClass();
 			}
 
 			//Args
