@@ -64,6 +64,16 @@
 					$this->id = $dbh->lastInsertId();
 				}
 
+				//Updating metas
+				if( isset($this->metas) && (is_object($this->metas) || is_array($this->metas)) ) {
+
+					if(is_array($this->metas)) {
+						$this->metas = (object) $this->metas;
+					}
+
+					$this->updateMetas((array) $this->metas);
+				}
+
 				$ret = $this->id;
 
 			} catch (PDOException $e) {
@@ -141,6 +151,12 @@
 
 		protected function preInit($args = false) {
 
+			//Metas
+			if(isset($this->meta_table) && $this->meta_table && (!isset($this->metas) || !$this->metas)) {
+				$this->metas = stdClass();
+			}
+
+			//Args
 			if(is_array($args) && isset($args[0])) {
 
 				$init_args = $args[0];
@@ -148,7 +164,7 @@
 
 				if($is_assoc) {
 
-					if( array_key_exists('fetch_metas', $init_args) ) {
+					if( array_key_exists('fetch_metas', $init_args) || in_array('fetch_metas', $init_args) ) {
 						$this->fetchMetas();
 					}
 
@@ -160,6 +176,10 @@
 					return $init_args;
 
 				} else {
+
+					if( in_array('fetch_metas', $init_args) ) {
+						$this->fetchMetas();
+					}
 
 					return $args[0];
 				}
@@ -249,7 +269,10 @@
 
 				foreach($metas as $meta) {
 
-					$ret[$meta->name] = $meta->value;
+					$ret[$meta->name] = @unserialize($meta->value);
+					if ($ret[$meta->name] === false) {
+						$ret[$meta->name] = $meta->value;
+					}
 				}
 
 			} catch (PDOException $e) {
@@ -290,29 +313,11 @@
 
 			if( $metas && is_array($metas) ) {
 
-				try {
-					$dbh->query('START TRANSACTION');
+				foreach( $metas as $name => $value ) {
 
-					$sql = "INSERT INTO {$this->meta_table} (id, {$this->meta_id}, value, name) VALUES (0, :meta_id, :value, :name) ON DUPLICATE KEY UPDATE value = :value";
-					$stmt = $dbh->prepare($sql);
-
-					foreach( $metas as $name => $value ) {
-
-						if ( is_array($value) || is_object($value) ) {
-							$value = serialize($value);
-						}
-
-						$stmt->bindValue(':meta_id', $this->id);
-						$stmt->bindValue(':value', $value);
-						$stmt->bindValue(':name', $name);
-						$stmt->execute();
-					}
-					$dbh->query('COMMIT');
-					$ret = true;
-
-				} catch (PDOException $e) {
-					log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::" . __FUNCTION__ . ": {$e->getMessage()}.", 'crood' );
+					$ret = $this->updateMeta($name, $value);
 				}
+				$ret = true;
 			}
 
 			return $ret;
