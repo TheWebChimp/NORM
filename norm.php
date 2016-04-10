@@ -148,6 +148,11 @@
 			$ret = 0;
 
 			$conditions = $conditions ?: 1;
+			if( is_array($conditions) ) {
+
+				$conditions = array_filter($conditions);
+				$conditions = implode(' AND ', $conditions);
+			}
 
 			# Generals
 			$table = static::$table;
@@ -219,7 +224,7 @@
 			# Sanity checks
 			$by =		in_array($by, $table_fields) ? $by : false;
 			$sort =		in_array( $sort, array('asc', 'desc') ) ? $sort : false;
-			$sort =		strtoupper($sort);
+			$sort =		$sort ? strtoupper($sort) : $sort;
 			$offset =	is_numeric($offset) ? $offset : false;
 			$show =		is_numeric($show) ? $show : false;
 			$group =	in_array($group, $table_fields) ? $group : false;
@@ -230,9 +235,20 @@
 				return $ret;
 			}
 
-			$group = 	$group ? "GROUP BY {$group}" : '';
+			if($group) {
+				if( !in_array($group, $table_fields) ) {
 
-			$conditions = is_array($conditions) ? implode(' AND ', $conditions) : $conditions;
+					log_to_file('Parameter Error: group not well defined. (Line ' . __LINE__ . ')', 'norm');
+				return $ret;
+				}
+				$group = 	$group ? "GROUP BY {$group}" : '';
+			}
+
+			if( is_array($conditions) ) {
+
+				$conditions = array_filter($conditions);
+				$conditions = implode(' AND ', $conditions);
+			}
 			$conditions = $conditions ? "WHERE {$conditions}" : '';
 
 			# Soft Delete
