@@ -22,94 +22,70 @@
 		 * @return mixed           Return values depending on the method called
 		 */
 		public static function __callStatic($method, $params) {
-
-			//Get by logic
-			if( substr($method, 0, 5) == 'getBy' ) {
-
-				$options = array();
-				$field = substr($method, 5);
+			$ret = false;
+			$matches = array();
+			# Run the regular expression
+			$res = preg_match('/^((get|all)((?:not)?(?:by|like|in|between|exists|regexp)?))([A-Za-z]+)$/i', $method, $matches);
+			if ($res === 1) {
+				# Get the matched parameters
+				$method = get_item($matches, 2, 'get');
+				$type = get_item($matches, 3, 'By');
+				$field = get_item($matches, 4, 'Id');
+				# Snake-ize them
+				$method = camel_to_snake($method);
+				$type = camel_to_snake($type);
 				$field = camel_to_snake($field);
-				$options['conditions'] = "{$field} = '{$params[0]}'";
-
-				if ( isset($params[1]) && is_array($params) ){
-
-					if(isset($params[1]['conditions'])) {
-
-						$options['conditions'] .= $params[1]['conditions'];
-						unset($params[1]['conditions']);
-					}
-
-					$options = array_merge($options, $params[1]);
+				# Check the type
+				$type = strtoupper($type);
+				$type = str_replace('_', ' ', $type);
+				# Prepare variables
+				$conditions = null;
+				$params_index = 1;
+				switch ($type) {
+					case 'BY':
+						$conditions = "{$field} = '{$params[0]}'";
+					break;
+					case 'LIKE':
+					case 'NOT LIKE':
+						$conditions = "{$field} {$type} '{$params[0]}'";
+					break;
+					case 'IN':
+					case 'NOT IN':
+						$values = implode($params[0], ',');
+						$conditions = "{$field} {$type} ({$values})";
+					break;
+					case 'BETWEEN':
+					case 'NOT BETWEEN':
+						$conditions = "{$field} {$type} ('{$params[0]}' AND '{$params[1]}')";
+						# Shift the index up
+						$params_index = 2;
+					break;
+					case 'REGEXP':
+					case 'NOT REGEXP':
+						$conditions = "{$field} {$type} '{$params[0]}'";
+					break;
+					default:
+						$conditions = '';
+					break;
 				}
-
-				return self::get($options);
-			}
-
-			//Get Like logic
-			else if( substr($method, 0, 7) == 'getLike' ) {
-
-				$options = array();
-				$field = substr($method, 7);
-				$field = camel_to_snake($field);
-				$options['conditions'] = "{$field} LIKE '%{$params[0]}%'";
-
-				if ( isset($params[1]) && is_array($params) ){
-
-					if(isset($params[1]['conditions'])) {
-
-						$options['conditions'] .= $params[1]['conditions'];
-						unset($params[1]['conditions']);
+				# Execute method
+				if ($conditions) {
+					$options = array();
+					$options['conditions'] = $conditions;
+					# Now for the actual parameters
+					$norm_params = get_item($params, $params_index, array());
+					if ( is_array($norm_params) && isset( $norm_params['conditions'] ) ) {
+						$options['conditions'] .= $norm_params['conditions'];
+						unset( $norm_params['conditions'] );
 					}
-
-					$options = array_merge($options, $params[1]);
+					$options = array_merge($options, $norm_params);
+					# And call the function
+					$methods = array('get', 'all');
+					$method = in_array($method, $methods) ? $method : 'get';
+					$ret = self::$method($options);
 				}
-
-				return self::get($options);
 			}
-
-			//All by logic
-			else if( substr($method, 0, 5) == 'allBy' ) {
-
-				$options = array();
-				$field = substr($method, 5);
-				$field = camel_to_snake($field);
-				$options['conditions'] = "{$field} = '{$params[0]}'";
-
-				if ( isset($params[1]) && is_array($params) ){
-
-					if(isset($params[1]['conditions'])) {
-
-						$options['conditions'] .= $params[1]['conditions'];
-						unset($params[1]['conditions']);
-					}
-
-					$options = array_merge($options, $params[1]);
-				}
-
-				return self::all($options);
-			}
-
-			//All like logic
-			else if( substr($method, 0, 7) == 'allLike' ) {
-
-				$options = array();
-				$field = substr($method, 7);
-				$field = camel_to_snake($field);
-				$options['conditions'] = "{$field} LIKE '%{$params[0]}%'";
-
-				if ( isset($params[1]) && is_array($params) ){
-
-					if(isset($params[1]['conditions'])) {
-
-						$options['conditions'] .= $params[1]['conditions'];
-						unset($params[1]['conditions']);
-					}
-
-					$options = array_merge($options, $params[1]);
-				}
-
-				return self::all($options);
-			}
+			return $ret;
 		}
 
 		/**
