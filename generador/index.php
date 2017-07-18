@@ -173,6 +173,14 @@
 
 					<form action="" method="post">
 
+						<div class="form-group">
+							<label for="inferer_lang" class="control-label">Inferir plurales</label>
+							<select type="text" class="form-control input-block" name="inferer_lang">
+								<option value="spa">En español</option>
+								<option value="eng">En inglés</option>
+							</select>
+						</div>
+
 						<h3>La Clase</h3>
 
 						<div class="row">
@@ -260,16 +268,17 @@
 						<h3>Campos</h3>
 						<div class="form-group">
 							<label for="table_fields" class="control-label">Campos de la tabla (uno por linea)</label>
-							<textarea id="table_fields" type="text" class="form-control input-block" name="table_fields"><?php echo $table_fields; ?></textarea>
+							<textarea id="table_fields" type="text" class="form-control input-block" name="table_fields" rows="6"><?php echo $table_fields; ?></textarea>
 						</div>
 
 						<div class="form-group">
 							<label for="update_fields" class="control-label">Campos de actualizacion (uno por linea)</label>
-							<textarea id="update_fields" type="text" class="form-control input-block" name="update_fields"><?php echo $update_fields; ?></textarea>
+							<textarea id="update_fields" type="text" class="form-control input-block" name="update_fields" rows="6"><?php echo $update_fields; ?></textarea>
 						</div>
 
 						<div class="form-actions">
 							<p class="text-right">
+								<button type="reset" class="button button-link">Limpiar valores</button>
 								<button type="submit" class="button button-primary">Generar</button>
 							</p>
 						</div>
