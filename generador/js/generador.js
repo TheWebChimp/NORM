@@ -33,6 +33,10 @@ jQuery(document).ready(function($) {
 		});
 	}
 
+	function trimAll(str) {
+		return str.replace(/\s/g, '');
+	}
+
 	function inferPlural(str, lang) {
 		switch (lang) {
 			case 'spa':
@@ -85,8 +89,8 @@ jQuery(document).ready(function($) {
 		val = toSeparateWords(val);
 		val = toTitleCase(val);
 		// Update fields
-		if (! singularClassName.val() ) singularClassName.val( val );
-		if (! pluralClassName.val() ) pluralClassName.val( inferPlural(val, lang) );
+		if (! singularClassName.val() ) singularClassName.val( trimAll(val) );
+		if (! pluralClassName.val() ) pluralClassName.val( trimAll(inferPlural(val, lang)) );
 		if (! singularClassDescription.val() ) singularClassDescription.val( val );
 		if (! pluralClassDescription.val() ) pluralClassDescription.val( inferPlural(val, lang) );
 	});
@@ -100,5 +104,18 @@ jQuery(document).ready(function($) {
 		val = val.replace(/^created\s/gm, '');
 		// Update field
 		updateFields.val( val );
+	});
+
+	$('.js-reset-fields').on('click', function(e) {
+		e.preventDefault();
+		$('[name=table_name]').val('');
+		$('[name=singular_class_name]').val('');
+		$('[name=plural_class_name]').val('');
+		$('[name=singular_class_description]').val('');
+		$('[name=plural_class_description]').val('');
+		$('[name=meta_id]').val('');
+		$('[name=meta_table]').val('');
+		$('[name=table_fields]').val('');
+		$('[name=update_fields]').val('');
 	});
 });

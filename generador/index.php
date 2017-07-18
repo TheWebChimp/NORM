@@ -278,7 +278,7 @@
 
 						<div class="form-actions">
 							<p class="text-right">
-								<button type="reset" class="button button-link">Limpiar valores</button>
+								<a href="#" class="button button-link js-reset-fields">Limpiar valores</a>
 								<button type="submit" class="button button-primary">Generar</button>
 							</p>
 						</div>
