@@ -235,7 +235,7 @@
 
 			try {
 
-				$sql = $query ? $query : "SELECT {$query_fields} FROM {$table} {$conditions} {$group} ORDER BY {$by} {$sort} LIMIT {$offset}, {$show}";
+				$sql = $query ? $query : "SELECT {$query_fields} FROM `{$table}` {$conditions} {$group} ORDER BY {$by} {$sort} LIMIT {$offset}, {$show}";
 
 				if($debug) echo $sql;
 				if($code) return $sql;
