@@ -102,11 +102,10 @@
 		//Replacing
 
 		//Metas
-		$meta_model;
+		$meta_model = '';
 
 		if($has_meta) {
 
-			$meta_model = '';
 			$meta_model .= "\n\n\t\t\t#metaModel\n";
 			$meta_model .= "\t\t\t\$this->meta_id = \t\t\t\t'{$meta_id}';\n";
 			$meta_model .= "\t\t\t\$this->meta_table = \t\t\t'{$meta_table}';";
@@ -171,7 +170,7 @@
 						<p>Estimado chimp, llenando el siguiente formulario podrás crear tu propio modelo.</p>
 					</div>
 
-					<form action="" method="post">
+					<form action="" method="post" data-submit="validate">
 
 						<div class="form-group">
 							<label for="inferer_lang" class="control-label">Inferir plurales</label>
@@ -187,14 +186,14 @@
 							<div class="col col-8">
 								<div class="form-group">
 									<label for="table_name" class="control-label">Nombre de la tabla <span class="required">*</span></label>
-									<input id="table_name" type="text" class="form-control input-block" name="table_name" value="<?php echo $table_name; ?>">
+									<input id="table_name" type="text" data-validate="required" class="form-control input-block" name="table_name" value="<?php echo $table_name; ?>">
 								</div>
 							</div>
 
 							<div class="col col-4">
 								<div class="form-group">
 									<label for="version" class="control-label">Versión <span class="required">*</span></label>
-									<input id="version" type="text" class="form-control input-block" name="version" value="<?php echo $version; ?>">
+									<input id="version" type="text" data-validate="required" class="form-control input-block" name="version" value="<?php echo $version; ?>">
 								</div>
 							</div>
 						</div>
@@ -203,14 +202,14 @@
 							<div class="col col-6">
 								<div class="form-group">
 									<label for="singular_class_name" class="control-label">Nombre de Clase Singular <span class="required">*</span></label>
-									<input id="singular_class_name" type="text" class="form-control input-block" name="singular_class_name" value="<?php echo $singular_class_name; ?>">
+									<input id="singular_class_name" type="text" data-validate="required" class="form-control input-block" name="singular_class_name" value="<?php echo $singular_class_name; ?>">
 								</div>
 							</div>
 
 							<div class="col col-6">
 								<div class="form-group">
 									<label for="plural_class_name" class="control-label">Nombre de Clase Plural <span class="required">*</span></label>
-									<input id="plural_class_name" type="text" class="form-control input-block" name="plural_class_name" value="<?php echo $plural_class_name; ?>">
+									<input id="plural_class_name" type="text" data-validate="required" class="form-control input-block" name="plural_class_name" value="<?php echo $plural_class_name; ?>">
 								</div>
 							</div>
 						</div>
@@ -219,14 +218,14 @@
 							<div class="col col-6">
 								<div class="form-group">
 									<label for="singular_class_description" class="control-label">Descripción de Clase Singular <span class="required">*</span></label>
-									<input id="singular_class_description" type="text" class="form-control input-block" name="singular_class_description" value="<?php echo $singular_class_description; ?>">
+									<input id="singular_class_description" type="text" data-validate="required" class="form-control input-block" name="singular_class_description" value="<?php echo $singular_class_description; ?>">
 								</div>
 							</div>
 
 							<div class="col col-6">
 								<div class="form-group">
 									<label for="plural_class_description" class="control-label">Descripción de Clase Plural <span class="required">*</span></label>
-									<input id="plural_class_description" type="text" class="form-control input-block" name="plural_class_description" value="<?php echo $plural_class_description; ?>">
+									<input id="plural_class_description" type="text" data-validate="required" class="form-control input-block" name="plural_class_description" value="<?php echo $plural_class_description; ?>">
 								</div>
 							</div>
 						</div>
@@ -253,26 +252,26 @@
 							<div class="col col-6">
 								<div class="form-group">
 									<label for="meta_id" class="control-label">Columna de ID <span class="required">*</span></label>
-									<input id="meta_id" type="text" class="form-control input-block" name="meta_id" value="<?php echo $meta_id; ?>">
+									<input id="meta_id" type="text" data-validate="required" class="form-control input-block" name="meta_id" value="<?php echo $meta_id; ?>">
 								</div>
 							</div>
 
 							<div class="col col-6">
 								<div class="form-group">
 									<label for="meta_table" class="control-label">Nombre de la Tabla <span class="required">*</span></label>
-									<input id="meta_table" type="text" class="form-control input-block" name="meta_table" value="<?php echo $meta_table; ?>">
+									<input id="meta_table" type="text" data-validate="required" class="form-control input-block" name="meta_table" value="<?php echo $meta_table; ?>">
 								</div>
 							</div>
 						</div>
 
 						<h3>Campos</h3>
 						<div class="form-group">
-							<label for="table_fields" class="control-label">Campos de la tabla (uno por linea)</label>
+							<label for="table_fields" class="control-label">Campos de la tabla <small>(uno por linea)</small></label>
 							<textarea id="table_fields" type="text" class="form-control input-block" name="table_fields" rows="6"><?php echo $table_fields; ?></textarea>
 						</div>
 
 						<div class="form-group">
-							<label for="update_fields" class="control-label">Campos de actualizacion (uno por linea)</label>
+							<label for="update_fields" class="control-label">Campos de actualizacion <small>(uno por linea)</small></label>
 							<textarea id="update_fields" type="text" class="form-control input-block" name="update_fields" rows="6"><?php echo $update_fields; ?></textarea>
 						</div>
 
@@ -301,7 +300,7 @@
 			<div class="margins">
 				<div class="footer-copyright">
 					<small class="cf">
-						<span class="copyright-left">Copyright &copy; 2015 tetstets</span>
+						<span class="copyright-left">Copyright &copy; <?php echo date('Y'); ?> tetstets</span>
 						<span class="copyright-right">Made for <strong>Hummingbird</strong> with <strong>Chimplate</strong></span>
 					</small>
 				</div>
@@ -310,6 +309,7 @@
 	</footer>
 
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+	<script type="text/javascript" src="//gitcdn.link/repo/biohzrdmx/jQuery.Validator/series4/jquery.valid4tor.min.js"></script>
 	<script type="text/javascript" src="js/codemirror.min.js"></script>
 	<script type="text/javascript" src="js/generador.js"></script>
 </body>

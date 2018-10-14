@@ -70,6 +70,23 @@ jQuery(document).ready(function($) {
 		return str;
 	}
 
+	$('form[data-submit=validate]').on('submit', function() {
+		var form = $(this);
+		return form.validate({
+			callbacks: {
+				fail: function(field, type, message) {
+					field.closest('.form-group').addClass('has-error');
+					field.on('focus', function() {
+						field.closest('.form-group').removeClass('has-error');
+						field.off('focus');
+					});
+				},
+				error: function(fields) {
+				}
+			}
+		});
+	});
+
 	$('[name=table_name]').on('change', function() {
 		var el = $(this),
 			val = el.val(),
