@@ -48,7 +48,7 @@
 
 			try {
 				# Create or update
-				$sql = "INSERT INTO {$this->table} ({$table_fields})
+				$sql = "INSERT INTO `{$this->table}` ({$table_fields})
 						VALUES ({$bind_fields})
 						ON DUPLICATE KEY UPDATE {$param_fields}";
 
@@ -95,11 +95,11 @@
 
 				if(in_array('deleted', $this->table_fields)) {
 
-					$sql = "UPDATE {$this->table} SET deleted = 1 WHERE id = :id";
+					$sql = "UPDATE `{$this->table}` SET `deleted` = 1 WHERE `id` = :id";
 
 				} else {
 
-					$sql = "DELETE FROM {$this->table} WHERE id = :id";
+					$sql = "DELETE FROM `{$this->table}` WHERE `id` = :id";
 				}
 
 				$stmt = $dbh->prepare($sql);
@@ -134,8 +134,8 @@
 			else if($action == 'param') {
 				foreach ($fields as $field) {
 
-					if($field == 'modified') 	$ret[] = "{$field} = NOW()";
-					else 						$ret[] = "{$field} = :{$field}";
+					if($field == 'modified') 	$ret[] = "`{$field}` = NOW()";
+					else 						$ret[] = "`{$field}` = :{$field}";
 				}
 			} else { $ret = $fields; }
 
@@ -238,7 +238,7 @@
 			$ret = $default;
 
 			try {
-				$sql = "SELECT value FROM {$this->meta_table} WHERE {$this->meta_id} = :id AND name = :name";
+				$sql = "SELECT `value` FROM `{$this->meta_table}` WHERE `{$this->meta_id}` = :id AND `name` = :name";
 				$stmt = $dbh->prepare($sql);
 				$stmt->bindValue(':id', $this->id);
 				$stmt->bindValue(':name', $name);
@@ -261,7 +261,7 @@
 			$dbh = $site->getDatabase();
 			$ret = array();
 			try {
-				$sql = "SELECT name, value FROM {$this->meta_table} WHERE {$this->meta_id} = :id";
+				$sql = "SELECT `name`, `value` FROM `{$this->meta_table}` WHERE `{$this->meta_id}` = :id";
 				$stmt = $dbh->prepare($sql);
 				$stmt->bindValue(':id', $this->id);
 				$stmt->execute();
@@ -290,12 +290,20 @@
 				$value = serialize($value);
 			}
 			try {
-				$sql = "INSERT INTO {$this->meta_table} (id, {$this->meta_id}, value, name) VALUES (0, :meta_id, :value, :name) ON DUPLICATE KEY UPDATE value = :value";
+				$sql = "INSERT INTO `{$this->meta_table}` (id, {$this->meta_id}, value, name) VALUES (0, :meta_id, :value, :name) ON DUPLICATE KEY UPDATE `value` = :value";
 				$stmt = $dbh->prepare($sql);
 				$stmt->bindValue(':meta_id', $this->id);
 				$stmt->bindValue(':value', $value);
 				$stmt->bindValue(':name', $name);
 				$stmt->execute();
+
+				if(isset($this->metas) && is_object($this->metas)) {
+					$this->metas->$name = $value;
+				} else {
+					$this->metas = new stdClass();
+					$this->metas->$name = $value;
+				}
+
 				if ( $dbh->lastInsertId() ) {
 					$ret = true;
 				}
