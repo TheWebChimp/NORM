@@ -13,6 +13,8 @@
 		protected $table;
 		protected $table_fields;
 		protected $update_fields;
+		protected $mandatory_fields;
+		protected $field_types;
 		protected $search_fields;
 		protected $singular_class_name;
 		protected $plural_class_name;
@@ -25,16 +27,68 @@
 
 		function init($args = false) { }
 
+		function checkFieldTypes($mode = 'encode') {
+
+			global $app;
+			if($this->field_types) {
+				foreach($this->table_fields as $field) {
+					foreach($this->field_types as $field_type => $def) {
+
+						if($field == $field_type) {
+
+							if($def['type'] == 'json') {
+
+								if(!$this->{$field}) {
+									$this->{$field} = [];
+								}
+								$this->{$field} = $mode == 'encode' ? @json_encode($this->{$field}) : @json_decode($this->{$field});
+							}
+
+							if($def['type'] == 'slug') {
+
+								if( $mode == 'encode') {
+
+									$reference = $def['reference'];
+									if($this->slug == '' || !preg_match('/^[a-z][-a-z0-9]*$/', $this->slug)) {
+										$slug = $app->slugify($this->{$reference});
+									} else {
+										$slug = $this->slug;
+									}
+
+									$count = $this->plural_class_name::count("slug = '{$slug}' AND id != {$this->id}");
+									if($count) $slug .= '-' . ($count);
+									$this->{$field} = $slug;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
 		# Create & Update
 		function save() {
 
-			global $site;
-			$dbh = $site->getDatabase();
+			global $app;
+			$dbh = $app->getDatabase();
 			$ret = false;
 
 			$table_fields = $this->querify($this->table_fields);
+			$escape_fields = $this->querify($this->table_fields, 'escape');
 			$bind_fields = $this->querify($this->table_fields, 'bind');
 			$param_fields = $this->querify($this->update_fields, 'param');
+
+			$this->checkFieldTypes();
+
+			if($this->mandatory_fields && is_array($this->mandatory_fields)) {
+
+				foreach($this->mandatory_fields as $field) {
+					if(empty($this->$field)) {
+						throw new Exception("Saving instance for `{$this->table}` without completing mandatory field: {$field}");
+						return false;
+					}
+				}
+			}
 
 			if( in_array('fts', $this->table_fields) && count($this->search_fields) ) {
 
@@ -48,7 +102,7 @@
 
 			try {
 				# Create or update
-				$sql = "INSERT INTO `{$this->table}` ({$table_fields})
+				$sql = "INSERT INTO `{$this->table}` ({$escape_fields})
 						VALUES ({$bind_fields})
 						ON DUPLICATE KEY UPDATE {$param_fields}";
 
@@ -78,7 +132,11 @@
 
 			} catch (PDOException $e) {
 				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::" . __FUNCTION__ . ": {$e->getMessage()}. Query: {$sql}", 'crood' );
+				throw new Exception($e->getMessage());
 			}
+
+			$this->checkFieldTypes('decode');
+
 			return $ret;
 		}
 
@@ -87,13 +145,18 @@
 		 * @return boolean True on success, False otherwise
 		 */
 		function delete() {
-			global $site;
-			$dbh = $site->getDatabase();
+			global $app;
+			$dbh = $app->getDatabase();
 			$ret = false;
 
 			try {
 
-				if(in_array('deleted', $this->table_fields)) {
+				if(in_array('deleted', $this->table_fields) || in_array('hasSoftDelete', class_uses($this->singular_class_name))) {
+
+					if(isset($this->slug)) {
+						$this->slug = $this->slug . '---deleted-' . time();
+						$this->save();
+					}
 
 					$sql = "UPDATE `{$this->table}` SET `deleted` = 1 WHERE `id` = :id";
 
@@ -125,13 +188,15 @@
 
 			$ret = array();
 
-			if ($action == 'bind') {
+			if ($action == 'escape') {
+				foreach ($fields as $field) {
+					$ret[] = "`{$field}`";
+				}
+			} else if ($action == 'bind') {
 				foreach ($fields as $field) {
 					$ret[] = ":{$field}";
 				}
-			}
-
-			else if($action == 'param') {
+			} else if($action == 'param') {
 				foreach ($fields as $field) {
 
 					if($field == 'modified') 	$ret[] = "`{$field}` = NOW()";
@@ -150,6 +215,14 @@
 		                                                                   */
 
 		protected function preInit($args = false) {
+
+			//Field Types
+			$this->checkFieldTypes('decode');
+
+			//Trait Use
+			if(in_array('TraitorTagsRelation', class_uses($this->singular_class_name))) {
+				$this->getTags();
+			}
 
 			//Metas
 			if(isset($this->meta_table) && $this->meta_table && (!isset($this->metas) || !$this->metas)) {
@@ -181,7 +254,7 @@
 						$this->fetchMetas();
 					}
 
-					return $args[0];
+					return $init_args;
 				}
 
 			} else {
@@ -233,8 +306,8 @@
 
 		function getMeta($name, $default = '') {
 
-			global $site;
-			$dbh = $site->getDatabase();
+			global $app;
+			$dbh = $app->getDatabase();
 			$ret = $default;
 
 			try {
@@ -248,6 +321,13 @@
 					if ($ret === false) {
 						$ret = $row->value;
 					}
+
+					if(isset($this->metas) && is_object($this->metas)) {
+						$this->metas->$name = $ret;
+					} else {
+						$this->metas = new stdClass();
+						$this->metas->$name = $ret;
+					}
 				}
 			} catch (PDOException $e) {
 				log_to_file( "Database error: {$e->getCode()} (Line {$e->getLine()}) in {$this->singular_class_name}::" . __FUNCTION__ . ": {$e->getMessage()}", 'crood' );
@@ -257,8 +337,8 @@
 
 		function getMetas() {
 
-			global $site;
-			$dbh = $site->getDatabase();
+			global $app;
+			$dbh = $app->getDatabase();
 			$ret = array();
 			try {
 				$sql = "SELECT `name`, `value` FROM `{$this->meta_table}` WHERE `{$this->meta_id}` = :id";
@@ -283,8 +363,8 @@
 
 		function updateMeta($name, $value) {
 
-			global $site;
-			$dbh = $site->getDatabase();
+			global $app;
+			$dbh = $app->getDatabase();
 			$ret = false;
 			if ( is_array($value) || is_object($value) ) {
 				$value = serialize($value);
@@ -315,8 +395,8 @@
 
 		function updateMetas($metas) {
 
-			global $site;
-			$dbh = $site->getDatabase();
+			global $app;
+			$dbh = $app->getDatabase();
 			$ret = false;
 
 			if( $metas && is_array($metas) ) {
@@ -331,4 +411,6 @@
 			return $ret;
 		}
 	}
+
+	trait hasSoftDelete {}
 ?>

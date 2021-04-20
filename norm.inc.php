@@ -16,6 +16,13 @@
 		protected static $plural_class_name;
 
 		/**
+		 * Returns the class table name
+		 * @return string $conditions   table name
+		 */
+		public static function getTable() { return static::$table; }
+		public static function getTableFields() { return static::$table_fields; }
+
+		/**
 		 * The al'mighty magic __callStatic function
 		 * @param  string $method  Name of the method called
 		 * @param  array $params   Non asociative array with the params from called methos
@@ -23,7 +30,7 @@
 		 */
 		public static function __callStatic($method, $params) {
 			$ret = false;
-			$matches = array();
+			$matches = [];
 			# Run the regular expression
 			$res = preg_match('/^((get|all)((?:not)?(?:by|like|in|between|exists|regexp)?))([A-Za-z]+)$/i', $method, $matches);
 			if ($res === 1) {
@@ -70,12 +77,22 @@
 				}
 				# Execute method
 				if ($conditions) {
-					$options = array();
-					$options['conditions'] = $conditions;
+					$options = [];
+					$options['conditions'] = [ $conditions ];
 					# Now for the actual parameters
-					$norm_params = get_item($params, $params_index, array());
+					$norm_params = get_item($params, $params_index, []);
+
 					if ( is_array($norm_params) && isset( $norm_params['conditions'] ) ) {
-						$options['conditions'] .= $norm_params['conditions'];
+
+						if(is_array($norm_params['conditions'])) {
+
+							$options['conditions'] = array_merge($options['conditions'], $norm_params['conditions']);
+
+						} else {
+
+							$options['conditions'] .= $norm_params['conditions'];
+						}
+
 						unset( $norm_params['conditions'] );
 					}
 					$options = array_merge($options, $norm_params);
@@ -94,17 +111,23 @@
 		 * @return string         String with all the fields imploded for querying
 		 */
 		public static function querify($fields, $action = false) {
-			$ret = array();
+			$ret = [];
 
-			if($action == 'bind') {
+			if ($action == 'escape') {
+				foreach ($fields as $field) {
+					$ret[] = "`{$field}`";
+				}
+			} else if($action == 'bind') {
 				foreach ($fields as $field) {
 					$ret[] = ":{$field}";
 				}
-			}
-
-			else if($action == 'param') {
+			} else if($action == 'param') {
 				foreach ($fields as $field) {
 					$ret[] = "{$field} = :{$field}";
+				}
+			} else if($action == 'metaify') {
+				foreach ($fields as $field) {
+					$ret[] = "t.`{$field}`";
 				}
 			}
 
@@ -114,13 +137,43 @@
 		}
 
 		/**
+		 * Prepares conditions to handle left joins with meta table, will transform fields to meta
+		 * value respectively
+		 * @param  array $metas        Array with metas to consider
+		 * @return array $conditions   Array with conditions to use
+		 */
+		public static function metaify($metas, $conditions) {
+
+			$joins = [];
+			$names = [];
+			$patterns = [];
+			$replaces = [];
+
+			foreach($metas as $k => $meta) {
+				$k = $k+1;
+				$patterns[] = "/{$meta}/";
+				$replaces[] = "m{$k}.`value`";
+				$joins[] = "LEFT JOIN (SELECT * FROM " . static::$table . "_meta WHERE `name` = '{$meta}') m{$k} ON m{$k}.id_" . static::$table . " = t.id ";
+			}
+
+			$meta_query = implode(' ', $joins) . ' WHERE (%s)';
+
+			foreach($conditions as $k => $condition) {
+				$conditions[$k] = preg_replace($patterns, $replaces, $condition);
+			}
+			$conditions = array_filter($conditions);
+
+			return sprintf($meta_query, implode(' AND ', $conditions) ?: 1);
+		}
+
+		/**
 		 * Return the number of elements depending on the conditions
 		 * @param  string $id  Condition for the counting query
 		 * @return string      Number of counted elements
 		 */
 		public static function count($conditions = 1) {
-			global $site;
-			$dbh = $site->getDatabase();
+			global $app;
+			$dbh = $app->getDatabase();
 			$ret = 0;
 
 			$conditions = $conditions ?: 1;
@@ -130,12 +183,20 @@
 				$conditions = implode(' AND ', $conditions);
 			}
 
+			//Metaify
+			$conditions = substr(trim($conditions), 0, 4) == 'LEFT' ? "t {$conditions}" : "WHERE {$conditions}";
+
 			# Generals
 			$table = static::$table;
 			$class_name = static::$plural_class_name;
 
+			if(in_array('deleted', static::$table_fields) || in_array('hasSoftDelete', class_uses(static::$singular_class_name))) {
+
+				$conditions = $conditions ? "$conditions AND deleted != 1" : 'WHERE deleted != 1';
+			}
+
 			try {
-				$sql = "SELECT COUNT(*) AS total FROM {$table} WHERE {$conditions};";
+				$sql = "SELECT COUNT(*) AS total FROM `{$table}` {$conditions};";
 				$stmt = $dbh->prepare($sql);
 				$stmt->execute();
 				$row = $stmt->fetch();
@@ -151,7 +212,7 @@
 		 * @param  array $options  List of options intended to modify the query behavior
 		 * @return array           Array with User objects, False on error
 		 */
-		public static function get( $options = array() ) {
+		public static function get( $options = [] ) {
 
 			$ret = false;
 
@@ -170,16 +231,16 @@
 		 * @param  array $options  List of options intended to modify the query behavior
 		 * @return array           Array with User objects, False on error
 		 */
-		public static function all( $options = array() ) {
-			global $site;
-			$dbh = $site->getDatabase();
-			$ret = array();
+		public static function all( $options = [] ) {
+			global $app;
+			$dbh = $app->getDatabase();
+			$ret = [];
 
 			# Generals
 			$table = static::$table;
 			$table_fields = static::$table_fields;
 			$class_name = static::$plural_class_name;
-			$query_fields = static::querify(get_item($options, 'query_fields', $table_fields));
+			$query_fields = static::querify(get_item($options, 'query_fields', $table_fields), get_item($options, 'meta_conditions', '') ? 'metaify' : 'escape');
 
 			# Default variables
 			$show =			get_item($options, 'show', 1000);
@@ -189,7 +250,8 @@
 			$group =		get_item($options, 'group', '');
 
 			$conditions =	get_item($options, 'conditions', '');
-			$pdoargs =		get_item($options, 'pdoargs', array());
+			$mconditions = 	get_item($options, 'meta_conditions', '');
+			$pdoargs =		get_item($options, 'pdoargs', []);
 
 			$debug =		get_item($options, 'debug', false);
 			$code =			get_item($options, 'code', false);
@@ -225,17 +287,20 @@
 				$conditions = array_filter($conditions);
 				$conditions = implode(' AND ', $conditions);
 			}
-			$conditions = $conditions ? "WHERE {$conditions}" : '';
+			$conditions = $conditions ? "WHERE ({$conditions})" : '';
+			$conditions = $mconditions ? "t {$mconditions}" : $conditions;
 
 			# Soft Delete
-			if(in_array('deleted', $table_fields)) {
+			if(in_array('deleted', $table_fields) || in_array('hasSoftDelete', class_uses(static::$singular_class_name))) {
 
-				$conditions .= ($conditions ? ' AND `deleted` != 1' : 'WHERE `deleted` != 1');
+				$conditions = $conditions ? "$conditions AND deleted != 1" : 'WHERE deleted != 1';
 			}
 
 			try {
 
-				$sql = $query ? $query : "SELECT {$query_fields} FROM `{$table}` {$conditions} {$group} ORDER BY {$by} {$sort} LIMIT {$offset}, {$show}";
+				$sql = $query ? $query : "SELECT {$query_fields} FROM `{$table}` {$conditions} {$group} ORDER BY `{$by}` {$sort} LIMIT {$offset}, {$show}";
+
+				$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
 				if($debug) echo $sql;
 				if($code) return $sql;
@@ -244,6 +309,8 @@
 				$stmt->execute();
 				$stmt->setFetchMode(PDO::FETCH_CLASS, static::$singular_class_name, array($pdoargs));
 				$ret = $stmt->fetchAll();
+
+				$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 
 			} catch (PDOException $e) {
 
