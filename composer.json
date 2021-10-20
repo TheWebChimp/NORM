@@ -3,7 +3,7 @@
     "description": "Your favorite ORM and CrUD tools",
     "type": "library",
     "require": {
-        "webchimp/dabbie": "stable",
+        "webchimp/dabbie": ">=1.0",
         "ext-pdo": "*",
         "ext-pdo_mysql": "*"
     },
