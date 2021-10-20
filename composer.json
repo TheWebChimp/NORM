@@ -1,0 +1,23 @@
+{
+    "name": "webchimp/norm",
+    "description": "Your favorite ORM and CrUD tools",
+    "type": "library",
+    "require": {
+        "webchimp/dabbie": "stable",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Webchimp\\Norm\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Rodrigo Tejero",
+            "email": "rodrigo.tejero@chimp.mx"
+        }
+    ],
+    "minimum-stability": "stable"
+}
