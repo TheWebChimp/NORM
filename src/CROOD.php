@@ -30,6 +30,8 @@
 		protected $singular_class_name;
 		protected $plural_class_name;
 
+		protected static $db_handler;
+
 		public $id;
 
 		# Meta Model
@@ -113,18 +115,14 @@
 			return json_encode($this);
 		}
 
-		/**
-		 * Gets the database handler to connect
-		 *
-		 * @return string $dbh  PDO Database Handler (From Dabbie)
-		 */
-		public function getDBHandler() {
-			global $dabbie;
-			if(!isset($dabbie) || !$dabbie) {
-				$dabbie = new Dabbie(get_item($options, 'database'));
-			}
+		public static function setDBHandler(Dabbie $handler) {
 
-			return $dabbie->getHandler();
+			static::$db_handler = $handler;
+		}
+
+		public static function getDBHandler() {
+
+			return static::$db_handler ? static::$db_handler->getHandler() : null;
 		}
 
 		public function fill() {
@@ -190,7 +188,7 @@
 
 		function save() {
 
-			$dbh = $this->getDBHandler();
+			$dbh = static::getDBHandler();
 			$ret = false;
 
 			$table_fields = 	querify($this->table_fields);
@@ -237,7 +235,7 @@
 
 		function delete() {
 
-			$dbh = $this->getDBHandler();
+			$dbh = static::getDBHandler();
 			$ret = false;
 
 			try {
@@ -315,7 +313,7 @@
 
 		public function getMeta(string $name, $default = '') {
 
-			$dbh = $this->getDBHandler();
+			$dbh = static::getDBHandler();
 			$ret = $default;
 
 			$meta_table = $this->getMetaTable();
@@ -349,7 +347,7 @@
 
 		public function getMetas(?array $default_metas = null) {
 
-			$dbh = $this->getDBHandler();
+			$dbh = static::getDBHandler();
 			$ret = [];
 
 			$meta_table = $this->getMetaTable();
@@ -400,7 +398,7 @@
 
 		public function updateMeta($name, $value) {
 
-			$dbh = $this->getDBHandler();
+			$dbh = static::getDBHandler();
 			$ret = false;
 
 			$meta_table = $this->getMetaTable();
