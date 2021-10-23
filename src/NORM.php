@@ -23,6 +23,7 @@
 		protected static $table_fields;
 		protected static $singular_class_name;
 		protected static $plural_class_name;
+		protected static $db_handler;
 
 		/**
 		 * Returns the class table name
@@ -55,18 +56,19 @@
 			return in_array('deleted', self::getTableFields() ?? []);
 		}
 
+		public static function setDBHandler(Dabbie $handler) {
+
+			static::$db_handler = $handler;
+		}
+
 		/**
 		 * Gets the database handler to connect
 		 *
 		 * @return string $dbh  PDO Database Handler (From Dabbie)
 		 */
 		public static function getDBHandler() {
-			global $dabbie;
-			if(!isset($dabbie) || !$dabbie) {
-				$dabbie = new Dabbie(get_item($options, 'database'));
-			}
 
-			return $dabbie->getHandler();
+			return static::$db_handler ? static::$db_handler->getHandler() : null;
 		}
 
 		/**

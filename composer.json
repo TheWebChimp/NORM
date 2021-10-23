@@ -12,7 +12,9 @@
 		}
 	],
 	"require": {
-		"webchimp/dabbie": ">=1.0"
+		"webchimp/dabbie": ">=1.0",
+		"ext-pdo": "*",
+		"ext-pdo_mysql": "*"
 	},
 	"autoload": {
 		"psr-4": {
