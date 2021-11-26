@@ -240,7 +240,7 @@
 
 			try {
 
-				if(in_array('deleted', $this->table_fields)) {
+				if(in_array('NORM\SoftDelete', class_uses($this->getSingularClass()))) {
 					$sql = "UPDATE `{$this->table}` SET `deleted` = 1 WHERE `id` = :id";
 				} else {
 					$sql = "DELETE FROM `{$this->table}` WHERE `id` = :id";
@@ -449,4 +449,6 @@
 			return $ret;
 		}
 	}
+
+	trait SoftDelete {}
 ?>

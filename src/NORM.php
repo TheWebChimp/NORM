@@ -52,8 +52,7 @@
 		public static function getPlural() { return static::$plural_class_name ?? get_class(); }
 
 		public static function checkSoftDelete() {
-
-			return in_array('deleted', self::getTableFields() ?? []);
+			return in_array('NORM\SoftDelete', class_uses(self::getSingular()));
 		}
 
 		public static function setDBHandler(Dabbie $handler) {
