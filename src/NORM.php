@@ -113,7 +113,7 @@
 					break;
 					case 'IN':
 					case 'NOT IN':
-						$values = implode($params[0], ',');
+						$values = implode(',', $params[0]);
 						$conditions = "`{$field}` {$type} ({$values})";
 					break;
 					case 'BETWEEN':
