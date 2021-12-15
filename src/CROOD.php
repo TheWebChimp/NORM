@@ -139,7 +139,7 @@
 
 				foreach($this->mandatory_fields as $field) {
 					if(empty($this->$field)) {
-						throw new \Exception("CROOD: Saving instance for `{$this->table}` without completing mandatory field: {$field}");
+						throw new \Exception("CROOD: Saving instance for `{$this->getTable()}` without completing mandatory field: {$field}");
 					}
 				}
 			}
@@ -191,6 +191,7 @@
 			$dbh = static::getDBHandler();
 			$ret = false;
 
+
 			$table_fields = 	querify($this->table_fields);
 			$escape_fields = 	querify($this->table_fields, 'escape');
 			$bind_fields = 		querify($this->table_fields, 'bind');
@@ -200,7 +201,7 @@
 
 			try {
 				# Create or update
-				$sql = "INSERT INTO `{$this->table}` ({$escape_fields})
+				$sql = "INSERT INTO `{$this->getTable()}` ({$escape_fields})
 						VALUES ({$bind_fields})
 						ON DUPLICATE KEY UPDATE {$param_fields}";
 
@@ -227,6 +228,7 @@
 				}
 
 				$ret = $this->id;
+				return $ret;
 
 			} catch (PDOException $e) {
 				throw new \Exception("CROOD Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}. Query: {$sql}");
