@@ -243,9 +243,9 @@
 			try {
 
 				if(in_array('NORM\SoftDelete', class_uses($this->getSingularClass()))) {
-					$sql = "UPDATE `{$this->table}` SET `deleted` = 1 WHERE `id` = :id";
+					$sql = "UPDATE `{$this->getTable()}` SET `deleted` = 1 WHERE `id` = :id";
 				} else {
-					$sql = "DELETE FROM `{$this->table}` WHERE `id` = :id";
+					$sql = "DELETE FROM `{$this->getTable()}` WHERE `id` = :id";
 				}
 
 				$stmt = $dbh->prepare($sql);
