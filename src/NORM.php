@@ -397,8 +397,6 @@
 
 
 						foreach($item as $k => $v) {
-							print_a($k);
-
 							if($k == 'metas') continue;
 
 							if(!in_array($k, $query_fields) && $v === null) {
