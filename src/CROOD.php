@@ -168,6 +168,7 @@
 
 			//Checking field types
 			if($this->field_types) {
+
 				foreach($this->table_fields as $field) {
 					foreach($this->field_types as $field_type => $def) {
 
@@ -190,7 +191,6 @@
 
 			$dbh = static::getDBHandler();
 			$ret = false;
-
 
 			$table_fields = 	querify($this->table_fields);
 			$escape_fields = 	querify($this->table_fields, 'escape');
@@ -228,6 +228,7 @@
 				}
 
 				$this->prepare([]);
+				$this->postSave();
 
 				$ret = $this->id;
 				return $ret;
@@ -271,6 +272,8 @@
 		}
 
 		protected function preInit($args = false) {
+
+			$this->postSave();
 
 			//Metas
 			if($this->getMetaTable() && (!isset($this->metas) || !$this->metas)) {
