@@ -395,11 +395,10 @@
 
 					array_map(function($item) use($query_fields) {
 
-
 						foreach($item as $k => $v) {
 							if($k == 'metas') continue;
 
-							if(!in_array($k, $query_fields) && $v === null) {
+							if(!in_array($k, $query_fields)) {
 								unset($item->{$k});
 							}
 						}
