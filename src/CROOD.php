@@ -227,6 +227,8 @@
 					$this->updateMetas((array) $this->metas);
 				}
 
+				$this->prepare([]);
+
 				$ret = $this->id;
 				return $ret;
 
@@ -281,6 +283,11 @@
 				$args = $args[0];
 
 				if($metas = $this->param($args, 'fetch_metas')) {
+
+					if(!is_array($metas)) {
+						$metas = explode(',', $metas);
+					}
+
 					$this->fetchMetas(is_array($metas) ? $metas : null);
 				}
 
