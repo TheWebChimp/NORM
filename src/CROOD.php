@@ -104,7 +104,8 @@
 		}
 
 		public function getMetaTable() {
-			return $this->meta_table ?? get_class($this) . '_meta';
+			$meta_table = $this->meta_table ?? get_class($this) . '_meta';
+			return strtolower($meta_table);
 		}
 
 		public function init() {}
