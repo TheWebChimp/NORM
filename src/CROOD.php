@@ -99,6 +99,10 @@
 			return $this->plural_class_name ?? get_class($this) . 's';
 		}
 
+		public function setPluralClass($plural) {
+			$this->plural_class_name = $plural;
+		}
+
 		public function getMetaId() {
 			return $this->meta_id ?? 'id_' . get_class($this);
 		}
