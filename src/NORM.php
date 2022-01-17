@@ -32,6 +32,10 @@
 		 */
 		public static function getTable() {
 
+			if(static::$singular_class_name && !static::$table) {
+				return strtolower(static::$singular_class_name);
+			}
+
 			return static::$table ?? tableize(rtrim(get_called_class(), 's'));
 		}
 
