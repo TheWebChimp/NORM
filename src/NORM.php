@@ -33,7 +33,7 @@
 		public static function getTable() {
 
 			if(static::$singular_class_name && !static::$table) {
-				return strtolower(static::$singular_class_name);
+				return strtolower(camel_to_snake(static::$singular_class_name));
 			}
 
 			return static::$table ?? tableize(rtrim(get_called_class(), 's'));
@@ -41,7 +41,7 @@
 
 		public static function getTableFields() {
 
-			$singular = ucfirst(static::getTable());
+			$singular = static::getSingular();
 			if(class_exists($singular)) {
 
 				$singular = new $singular;
