@@ -52,7 +52,7 @@
 			return static::$table_fields;
 		}
 
-		public static function getSingular() { return static::$singular_class_name ?? ucfirst(self::getTable()); }
+		public static function getSingular() { return static::$singular_class_name ?? ucfirst(snake_to_camel(self::getTable())); }
 		public static function getPlural() { return static::$plural_class_name ?? get_class(); }
 
 		public static function checkSoftDelete() {

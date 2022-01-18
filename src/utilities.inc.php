@@ -16,6 +16,11 @@
 		}
 	}
 
+	/**
+	 * Convert camelCase to snake_case
+	 * @param  string $val Original string
+	 * @return string      The converted string
+	 */
 	if(!function_exists('camel_to_snake')) {
 		function camel_to_snake($val) {
 			$val = preg_replace_callback('/[A-Z]/', '_camel_to_snake_callback', $val);
@@ -24,6 +29,19 @@
 
 		function _camel_to_snake_callback($match) {
 			return "_" . strtolower($match[0]);
+		}
+	}
+
+	/**
+	 * Convert snake_case to camelCase
+	 * @param  string $val Original string
+	 * @return string      The converted string
+	 */
+	if(!function_exists('snake_to_camel')) {
+		function snake_to_camel($val) {
+			$val = str_replace(' ', '', ucwords(str_replace('_', ' ', $val)));
+			$val = strtolower(substr($val, 0, 1)).substr($val, 1);
+			return $val;
 		}
 	}
 
