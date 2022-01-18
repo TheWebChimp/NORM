@@ -87,6 +87,10 @@
 			return $this->table ?? tableize(get_class($this));
 		}
 
+		public function setTable($table) {
+			$this->table = $table;
+		}
+
 		public function getTableFields() {
 			return $this->table_fields;
 		}
@@ -104,12 +108,20 @@
 		}
 
 		public function getMetaId() {
-			return $this->meta_id ?? 'id_' . get_class($this);
+			return $this->meta_id ?? 'id_' . $this->getTable();
+		}
+
+		public function setMetaId($meta_id) {
+			$this->$meta_id = $meta_id;
 		}
 
 		public function getMetaTable() {
-			$meta_table = $this->meta_table ?? get_class($this) . '_meta';
+			$meta_table = $this->meta_table ?? $this->getTable() . '_meta';
 			return strtolower($meta_table);
+		}
+
+		public function setMetaTable($meta_table) {
+			$this->meta_table = $meta_table;
 		}
 
 		public function init() {}
@@ -358,6 +370,7 @@
 				}
 			} catch (PDOException $e) {
 				throw new \Exception("CROOD Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}");
+				error_log("CROOD Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}");
 			}
 			return $ret;
 		}
