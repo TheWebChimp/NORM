@@ -96,7 +96,7 @@
 		}
 
 		public function getPluralClass() {
-			return $this->plural_class_name ?? get_class($this) . 's';
+			return $this->plural_class_name ?? pluralize(get_class($this));
 		}
 
 		public function setPluralClass($plural) {

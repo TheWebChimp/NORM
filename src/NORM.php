@@ -31,12 +31,7 @@
 		 * @return string $conditions   table name
 		 */
 		public static function getTable() {
-
-			if(static::$singular_class_name && !static::$table) {
-				return strtolower(camel_to_snake(static::$singular_class_name));
-			}
-
-			return static::$table ?? tableize(rtrim(get_called_class(), 's'));
+			return static::$table ?? tableize(static::getSingular());
 		}
 
 		public static function getTableFields() {
@@ -52,17 +47,18 @@
 			return static::$table_fields;
 		}
 
-		public static function getSingular() { return static::$singular_class_name ?? ucfirst(snake_to_camel(self::getTable())); }
+		public static function getSingular() {
+
+			return static::$singular_class_name ?? singularize(get_called_class());
+		}
+
 		public static function getPlural() { return static::$plural_class_name ?? get_class(); }
 
 		public static function checkSoftDelete() {
 			return in_array('NORM\SoftDelete', class_uses(self::getSingular()));
 		}
 
-		public static function setDBHandler(Dabbie $handler) {
-
-			static::$db_handler = $handler;
-		}
+		public static function setDBHandler(Dabbie $handler) { static::$db_handler = $handler; }
 
 		/**
 		 * Gets the database handler to connect
