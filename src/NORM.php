@@ -195,13 +195,17 @@
 			$ret = 0;
 
 			$conditions = $conditions ?: 1;
-			if(is_array($conditions)) {
+
+
+			$conditions = is_array($conditions) ? array_filter($conditions) : $conditions;
+
+			if(is_array($conditions) && count($conditions)) {
 
 				$conditions = array_filter($conditions);
 				$conditions = implode(' AND ', $conditions);
 			}
 
-			$conditions = "WHERE {$conditions}";
+			$conditions = $conditions ? "WHERE {$conditions}" : '';
 
 			# Generals
 			$table = $table ?: self::getTable();
@@ -374,6 +378,8 @@
 			try {
 
 				$sql = $query ? $query : "SELECT {$query_fields} FROM `{$table}` {$conditions} {$group} ORDER BY {$by_sort} LIMIT {$offset}, {$show}";
+
+				if($debug) echo $sql;
 
 				$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
