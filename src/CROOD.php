@@ -304,7 +304,7 @@
 
 				if($metas = $this->param($args, 'fetch_metas')) {
 
-					if(!is_array($metas)) {
+					if(!is_array($metas) && $metas != 1) {
 						$metas = explode(',', $metas);
 					}
 
