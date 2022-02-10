@@ -25,6 +25,10 @@
 		protected static $plural_class_name;
 		protected static $db_handler;
 
+		protected static $log_level;
+
+		public static function setLogLevel($level) { static::$log_level = $level; }
+
 		/**
 		 * Returns the class table name
 		 *
@@ -380,6 +384,12 @@
 				$sql = $query ? $query : "SELECT {$query_fields} FROM `{$table}` {$conditions} {$group} ORDER BY {$by_sort} LIMIT {$offset}, {$show}";
 
 				if($debug) echo $sql;
+
+				if(static::$log_level == 1) {
+
+					error_log($sql);
+				}
+
 
 				$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
