@@ -308,7 +308,51 @@
 						$metas = explode(',', $metas);
 					}
 
-					$this->fetchMetas(is_array($metas) ? $metas : null);
+					try {
+
+						$this->fetchMetas(is_array($metas) ? $metas : null);
+					} catch (\Exception $e) {
+					}
+				}
+
+				// Dynamic Fetch
+
+				foreach($args as $key => $value) {
+
+					if(preg_match('/fetch_(?<entity>.*)/', $key, $matches)) {
+
+						$entity = $matches['entity'];
+
+						if($entity != 'metas' && class_exists(ucwords($entity))) {
+
+							$received_class = ucwords($entity);
+
+							// Singular class
+							if(is_subclass_of($received_class, 'NORM\CROOD')) {
+								$method = 'getById';
+								$obj = new $received_class();
+								$plural_class = $obj->getPluralClass();
+							} else {
+								$method = 'allById';
+								$plural_class = $received_class;
+							}
+
+							// Check if instance has id from entity
+							$id_entity = "id_{$entity}";
+
+							try {
+
+								if(isset($this->$id_entity)) {
+
+									$this->$entity = call_user_func("{$plural_class}::{$method}", $this->$id_entity, is_array($value) ? $value : []);
+
+								} else {
+
+									$this->$entity = call_user_func("{$plural_class}::{$method}" . ucwords($this->getSingularClass()), $this->id, is_array($value) ? $value : []);
+								}
+							} catch(\Exception $e) {}
+						}
+					}
 				}
 
 				return $args;
