@@ -79,7 +79,12 @@
 			} else {
 
 				$params = $this->preInit($params);
-				$this->prepare($params ?? []);
+				try {
+
+					$this->prepare($params ?? []);
+				} catch(\Exception $e) {
+					echo $e->getMessage();
+				}
 			}
 		}
 

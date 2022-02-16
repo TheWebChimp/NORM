@@ -381,14 +381,25 @@
 
 			try {
 
-				$sql = $query ? $query : "SELECT {$query_fields} FROM `{$table}` {$conditions} {$group} ORDER BY {$by_sort} LIMIT {$offset}, {$show}";
+				// Cleaning query fields to get only whitelisted fields
+
+				$clean_query_fields = [];
+
+				$query_fields_array = get_item($options, 'query_fields', $table_fields);
+				$query_fields_array = is_string($query_fields_array) ? explode(',', $query_fields_array) : $query_fields_array;
+				$query_fields_array = array_map('trim', $query_fields_array);
+
+				foreach($query_fields_array as $query_field) {
+					if(in_array($query_field, $table_fields)) $clean_query_fields[] = $query_field;
+				}
+
+				$clean_query_fields = querify($clean_query_fields, 'escape');
+
+				$sql = $query ? $query : "SELECT {$clean_query_fields} FROM `{$table}` {$conditions} {$group} ORDER BY {$by_sort} LIMIT {$offset}, {$show}";
 
 				if($debug) echo $sql;
 
-				if(static::$log_level == 1) {
-
-					error_log($sql);
-				}
+				if(static::$log_level == 1) { error_log($sql); }
 
 
 				$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
