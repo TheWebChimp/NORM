@@ -67,10 +67,10 @@
 
 			$this->init();
 			$this->fill();
-			$this->default();
 
 			if(!$this->id) {
 
+				$this->default();
 				$this->id = 0;
 				$this->created = $now;
 				$this->modified = $now;
@@ -436,11 +436,8 @@
 
 			if($default_metas) {
 
-				if($default_metas) {
-
-					$default_metas = querify($default_metas, 'string');
-					$condition .= " AND `name` IN ({$default_metas})";
-				}
+				$default_metas = querify($default_metas, 'string');
+				$condition .= " AND `name` IN ({$default_metas})";
 			}
 
 			try {
