@@ -229,12 +229,12 @@
 		/**
 		 * Return the number of elements depending on the conditions
 		 *
-		 * @param int  $conditions
-		 * @param bool $table
+		 * @param mixed        $conditions
+		 * @param bool         $table
 		 * @return string      Number of counted elements
 		 * @throws Exception
 		 */
-		public static function count(int $conditions = 1, bool $table = false): string {
+		public static function count($conditions = 1, bool $table = false): string {
 
 			$dbh = self::getDBHandler();
 

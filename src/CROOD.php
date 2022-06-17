@@ -462,6 +462,23 @@
 
 				$args = $args[0];
 
+				$plural = $this->getPluralClass();
+
+				// Magic functions
+				foreach($args as $key => $value) {
+
+					if(is_array($value) && is_string($value[0]) && is_callable([$this, $value[0]])) {
+
+						try {
+							$method = $value[0];
+							array_shift($value);
+							$this->$key = call_user_func_array([$this, $method], $value);
+						} catch(Exception $e) { }
+					}
+				}
+
+				// Metas
+
 				if($metas = $this->param($args, 'fetch_metas')) {
 
 					if(!is_array($metas) && $metas != 1) {
@@ -469,10 +486,8 @@
 					}
 
 					try {
-
 						$this->fetchMetas(is_array($metas) ? $metas : null);
-					} catch(Exception $e) {
-					}
+					} catch(Exception $e) { }
 				}
 
 				// Dynamic Fetch
