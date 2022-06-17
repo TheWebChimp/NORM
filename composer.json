@@ -1,25 +1,27 @@
 {
-	"name": "webchimp/norm",
-	"description": "Your favorite ORM and CrUD tools",
-	"version": "2.0",
-	"type": "library",
-	"license": "MIT",
-	"authors": [
-		{
-			"name": "Rodrigo Tejero",
-			"email": "rodrigo.tejero@chimp.mx",
-			"hompeage": "https://chimp.mx"
-		}
-	],
-	"require": {
-		"webchimp/dabbie": "dev-main",
-		"ext-pdo": "*",
-		"ext-pdo_mysql": "*"
-	},
-	"autoload": {
-		"psr-4": {
-			"NORM\\": "src/"
-		}
-	},
-	"minimum-stability": "stable"
+  "name": "webchimp/norm",
+  "description": "Your favorite ORM and CrUD tools",
+  "version": "2.0",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Rodrigo Tejero",
+      "email": "rodrigo.tejero@chimp.mx",
+      "homepage": "https://chimp.mx"
+    }
+  ],
+  "require": {
+    "webchimp/dabbie": "dev-main",
+    "ext-pdo": "*",
+    "ext-pdo_mysql": "*",
+    "ext-json": "*",
+    "ext-mbstring": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "NORM\\": "src/"
+    }
+  },
+  "minimum-stability": "stable"
 }

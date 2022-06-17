@@ -1,6 +1,11 @@
 <?php
 
 	if(!function_exists('print_a')) {
+		/**
+		 * Pretty print for <pre>
+		 * @param $a
+		 * @return void
+		 */
 		function print_a($a) {
 			print('<pre>');
 			print_r($a);
@@ -9,44 +14,57 @@
 	}
 
 	if(!function_exists('get_item')) {
+		/**
+		 * Gets an item from an array or object, if not found, returns a default or empty string
+		 * @param $var
+		 * @param $key
+		 * @param mixed $default
+		 * @return mixed
+		 */
 		function get_item($var, $key, $default = '') {
-			return is_object($var) ?
-				( isset( $var->$key ) ? $var->$key : $default ) :
-				( isset( $var[$key] ) ? $var[$key] : $default );
+			return !is_object($var) ? ($var[$key] ?? $default) : ($var->$key ?? $default);
 		}
 	}
 
-	/**
-	 * Convert camelCase to snake_case
-	 * @param  string $val Original string
-	 * @return string      The converted string
-	 */
 	if(!function_exists('camel_to_snake')) {
-		function camel_to_snake($val) {
+		/**
+		 * Convert camelCase to snake_case
+		 * @param string $val Original string
+		 * @return string      The converted string
+		 */
+		function camel_to_snake(string $val): string {
 			$val = preg_replace_callback('/[A-Z]/', '_camel_to_snake_callback', $val);
 			return ltrim($val, '_');
 		}
 
-		function _camel_to_snake_callback($match) {
+		/**
+		 * @param $match
+		 * @return string
+		 */
+		function _camel_to_snake_callback($match): string {
 			return "_" . strtolower($match[0]);
 		}
 	}
 
-	/**
-	 * Convert snake_case to camelCase
-	 * @param  string $val Original string
-	 * @return string      The converted string
-	 */
 	if(!function_exists('snake_to_camel')) {
-		function snake_to_camel($val) {
+		/**
+		 * Convert snake_case to camelCase
+		 * @param string $val Original string
+		 * @return string      The converted string
+		 */
+		function snake_to_camel(string $val): string {
 			$val = str_replace(' ', '', ucwords(str_replace('_', ' ', $val)));
-			$val = strtolower(substr($val, 0, 1)).substr($val, 1);
-			return $val;
+			return strtolower(substr($val, 0, 1)).substr($val, 1);
 		}
 	}
 
 	if(!function_exists('querify')) {
-		function querify($fields, $action = false) {
+		/**
+		 * @param mixed $fields
+		 * @param mixed $action
+		 * @return string
+		 */
+		function querify($fields, $action = false): string {
 
 			$ret = [];
 			$fields = is_string($fields) ? explode(',', $fields) : $fields;
@@ -77,6 +95,11 @@
 	}
 
 	if(!function_exists('pluralize')) {
+		/**
+		 * @param $singular
+		 * @param $plural
+		 * @return mixed|string
+		 */
 		function pluralize($singular, $plural = null) {
 
 			if($plural !== null) return $plural;
@@ -94,6 +117,10 @@
 	}
 
 	if(!function_exists('singularize')) {
+		/**
+		 * @param $params
+		 * @return mixed
+		 */
 		function singularize($params) {
 			if (is_string($params)) {
 				$word = $params;
@@ -173,14 +200,18 @@
 	}
 
 	if(!function_exists('tableize')) {
+		/**
+		 * @param string $word
+		 * @return string
+		 * @throws Exception
+		 */
 		function tableize(string $word): string {
 			$tableized = preg_replace('~(?<=\\w)([A-Z])~u', '_$1', $word);
 
 			if ($tableized === null) {
-				throw new \Exception(sprintf('preg_replace returned null for value "%s"', $word));
+				throw new Exception(sprintf('preg_replace returned null for value "%s"', $word));
 			}
 
 			return mb_strtolower($tableized);
 		}
 	}
-?>

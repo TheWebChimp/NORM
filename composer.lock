@@ -1,0 +1,65 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "0f0629d603d2ed6113d7a71cab52142d",
+    "packages": [
+        {
+            "name": "webchimp/dabbie",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/TheWebChimp/Dabbie.git",
+                "reference": "14902bb52b5a46bed2cac0eb95a2e0488eef52fc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/TheWebChimp/Dabbie/zipball/14902bb52b5a46bed2cac0eb95a2e0488eef52fc",
+                "reference": "14902bb52b5a46bed2cac0eb95a2e0488eef52fc",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Dabbie\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Rodrigo Tejero",
+                    "email": "rodrigo.tejero@chimp.mx"
+                }
+            ],
+            "description": "Simple database connection",
+            "support": {
+                "issues": "https://github.com/TheWebChimp/Dabbie/issues",
+                "source": "https://github.com/TheWebChimp/Dabbie/tree/main"
+            },
+            "time": "2021-10-20T15:39:30+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {
+        "webchimp/dabbie": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*"
+    },
+    "platform-dev": [],
+    "plugin-api-version": "2.2.0"
+}

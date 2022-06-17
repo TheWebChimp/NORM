@@ -16,28 +16,74 @@
 	include 'utilities.inc.php';
 
 	use Dabbie\Dabbie;
-	use \PDO;
+	use Exception;
+	use PDOException;
+	use stdClass;
 
+	/**
+	 * @property false|string $created
+	 * @property stdClass     $metas
+	 * @property string       $modified
+	 */
 	class CROOD {
 
+		/**
+		 * @var string
+		 */
 		protected $table;
+		/**
+		 * @var array
+		 */
 		protected $table_fields;
+		/**
+		 * @var array
+		 */
 		protected $update_fields;
+		/**
+		 * @var array
+		 */
 		protected $mandatory_fields;
+		/**
+		 * @var
+		 */
 		protected $field_types;
+		/**
+		 * @var
+		 */
 		protected $search_fields;
 
+		/**
+		 * @var string
+		 */
 		protected $singular_class_name;
+		/**
+		 * @var string
+		 */
 		protected $plural_class_name;
 
+		/**
+		 * @var
+		 */
 		protected static $db_handler;
 
+		/**
+		 * @var int
+		 */
 		public $id;
 
 		# Meta Model
+		/**
+		 * @var
+		 */
 		protected $meta_id;
+		/**
+		 * @var
+		 */
 		protected $meta_table;
 
+		/**
+		 * @return array
+		 */
 		public function __debugInfo() {
 
 			$result = get_object_vars($this);
@@ -57,8 +103,32 @@
 			return $result;
 		}
 
+		public function __call($name, $arguments) {
+
+			$singular = $this->getSingularClass();
+			$plural = $this->getPluralClass();
+
+			// Check if the plural function exists
+
+			if(method_exists($plural, $name)) {
+
+				$r = new \ReflectionMethod($plural, $name);
+				$params = $r->getParameters();
+
+				// Check if the first parameter receives the id for the
+				if(isset($params[0]) && $params[0]->getName() == 'id_' . strtolower($singular)) {
+
+					return call_user_func_array("{$plural}::{$name}", [$this->id, ...$arguments]);
+				}
+			} else {
+
+				throw new Exception("CROOD Magic function: The function `{$name}` does not exists in class: {$plural}");
+			}
+		}
+
 		/**
 		 * Constructor
+		 * @throws Exception
 		 */
 		function __construct() {
 			$params = func_get_args();
@@ -74,7 +144,7 @@
 				$this->id = 0;
 				$this->created = $now;
 				$this->modified = $now;
-				$this->metas = new \stdClass();
+				$this->metas = new stdClass();
 
 			} else {
 
@@ -82,71 +152,133 @@
 				try {
 
 					$this->prepare($params ?? []);
-				} catch(\Exception $e) {
+				} catch(Exception $e) {
 					echo $e->getMessage();
 				}
 			}
 		}
 
-		public function getTable() {
+		/**
+		 * @return string
+		 * @throws Exception
+		 */
+		public function getTable(): string {
 			return $this->table ?? tableize(get_class($this));
 		}
 
+		/**
+		 * @param $table
+		 * @return void
+		 */
 		public function setTable($table) {
 			$this->table = $table;
 		}
 
-		public function getTableFields() {
+		/**
+		 * @return array
+		 */
+		public function getTableFields(): array {
 			return $this->table_fields;
 		}
 
-		public function getSingularClass() {
+		/**
+		 * @return string
+		 */
+		public function getSingularClass(): string {
 			return $this->singular_class_name ?? get_class($this);
 		}
 
-		public function getPluralClass() {
+		/**
+		 * @return string
+		 */
+		public function getPluralClass(): string {
 			return $this->plural_class_name ?? pluralize(get_class($this));
 		}
 
+		/**
+		 * @param $plural
+		 * @return void
+		 */
 		public function setPluralClass($plural) {
 			$this->plural_class_name = $plural;
 		}
 
-		public function getMetaId() {
+		/**
+		 * @return string
+		 * @throws Exception
+		 */
+		public function getMetaId(): string {
 			return $this->meta_id ?? 'id_' . $this->getTable();
 		}
 
+		/**
+		 * @param $meta_id
+		 * @return void
+		 */
 		public function setMetaId($meta_id) {
 			$this->$meta_id = $meta_id;
 		}
 
-		public function getMetaTable() {
+		/**
+		 * @return string
+		 * @throws Exception
+		 */
+		public function getMetaTable(): string {
 			$meta_table = $this->meta_table ?? $this->getTable() . '_meta';
 			return strtolower($meta_table);
 		}
 
+		/**
+		 * @param $meta_table
+		 * @return void
+		 */
 		public function setMetaTable($meta_table) {
 			$this->meta_table = $meta_table;
 		}
 
-		public function init() {}
-		public function default() {}
-		public function prepare($args) {}
+		/**
+		 * @return void
+		 */
+		public function init() { }
 
+		/**
+		 * @return void
+		 */
+		public function default() { }
+
+		/**
+		 * @param $args
+		 * @return void
+		 */
+		public function prepare($args) { }
+
+		/**
+		 * @return false|string
+		 */
 		public function __toString() {
 			return json_encode($this);
 		}
 
+		/**
+		 * @param Dabbie $handler
+		 * @return void
+		 */
 		public static function setDBHandler(Dabbie $handler) {
 
 			static::$db_handler = $handler;
 		}
 
+		/**
+		 * @return null
+		 */
 		public static function getDBHandler() {
 
 			return static::$db_handler ? static::$db_handler->getHandler() : null;
 		}
 
+		/**
+		 * @return void
+		 */
 		public function fill() {
 			foreach($this->table_fields as $field) {
 
@@ -154,6 +286,10 @@
 			}
 		}
 
+		/**
+		 * @return void
+		 * @throws Exception
+		 */
 		public function preSave() {
 
 			//Mandatory Fields
@@ -161,7 +297,7 @@
 
 				foreach($this->mandatory_fields as $field) {
 					if(empty($this->$field)) {
-						throw new \Exception("CROOD: Saving instance for `{$this->getTable()}` without completing mandatory field: {$field}");
+						throw new Exception("CROOD: Saving instance for `{$this->getTable()}` without completing mandatory field: {$field}");
 					}
 				}
 			}
@@ -186,6 +322,9 @@
 			}
 		}
 
+		/**
+		 * @return void
+		 */
 		function postSave() {
 
 			//Checking field types
@@ -209,23 +348,26 @@
 			}
 		}
 
-		function save() {
+		/**
+		 * @throws Exception
+		 */
+		function save(): int {
 
 			$dbh = static::getDBHandler();
-			$ret = false;
 
-			$table_fields = 	querify($this->table_fields);
-			$escape_fields = 	querify($this->table_fields, 'escape');
-			$bind_fields = 		querify($this->table_fields, 'bind');
-			$param_fields = 	querify($this->update_fields, 'param');
+			//$table_fields = 	querify($this->table_fields);
+			$escape_fields = querify($this->table_fields, 'escape');
+			$bind_fields = querify($this->table_fields, 'bind');
+			$param_fields = querify($this->update_fields, 'param');
 
 			$this->preSave();
+			$sql = '';
 
 			try {
 				# Create or update
-				$sql = "INSERT INTO `{$this->getTable()}` ({$escape_fields})
-						VALUES ({$bind_fields})
-						ON DUPLICATE KEY UPDATE {$param_fields}";
+				$sql = sprintf(/** @lang text */ 'INSERT INTO `%s` (%s)
+						VALUES (%s)
+						ON DUPLICATE KEY UPDATE %s', $this->getTable(), $escape_fields, $bind_fields, $param_fields);
 
 				$stmt = $dbh->prepare($sql);
 
@@ -235,55 +377,63 @@
 
 				$stmt->execute();
 
-				if (! $this->id && $dbh->lastInsertId() ) {
+				if(!$this->id && $dbh->lastInsertId()) {
 					$this->id = $dbh->lastInsertId();
 				}
 
 				//Updating metas
-				if( isset($this->metas) && (is_object($this->metas) || is_array($this->metas)) ) {
+				if(isset($this->metas) && (is_object($this->metas) || is_array($this->metas))) {
 
 					if(is_array($this->metas)) {
-						$this->metas = (object) $this->metas;
+						$this->metas = (object)$this->metas;
 					}
 
-					$this->updateMetas((array) $this->metas);
+					$this->updateMetas((array)$this->metas);
 				}
 
 				$this->prepare([]);
 				$this->postSave();
 
-				$ret = $this->id;
-				return $ret;
+				return $this->id;
 
-			} catch (PDOException $e) {
-				throw new \Exception("CROOD Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}. Query: {$sql}");
+			} catch(PDOException $e) {
+				throw new Exception("CROOD Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}. Query: {$sql}");
 			}
 		}
 
-		function delete() {
+		/**
+		 * @return bool
+		 * @throws Exception
+		 */
+		function delete(): bool {
 
 			$dbh = static::getDBHandler();
-			$ret = false;
 
 			try {
 
 				if(in_array('NORM\SoftDelete', class_uses($this->getSingularClass()))) {
-					$sql = "UPDATE `{$this->getTable()}` SET `deleted` = 1 WHERE `id` = :id";
+					$sql = /** @lang text */
+						"UPDATE `{$this->getTable()}` SET `deleted` = 1 WHERE `id` = :id";
 				} else {
-					$sql = "DELETE FROM `{$this->getTable()}` WHERE `id` = :id";
+					$sql = /** @lang text */
+						"DELETE FROM `{$this->getTable()}` WHERE `id` = :id";
 				}
 
 				$stmt = $dbh->prepare($sql);
 				$stmt->bindValue(':id', $this->id);
 				$stmt->execute();
-				$ret = true;
 
-			} catch (PDOException $e) {
-				throw new \Exception("CROOD Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}.");
+			} catch(PDOException $e) {
+				throw new Exception("CROOD Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}.");
 			}
-			return $ret;
+			return true;
 		}
 
+		/**
+		 * @param $args
+		 * @param $param
+		 * @return false|mixed
+		 */
 		function param($args, $param) {
 
 			if(isset($args[$param])) {
@@ -293,13 +443,18 @@
 			return false;
 		}
 
+		/**
+		 * @param mixed $args
+		 * @return mixed
+		 * @throws Exception
+		 */
 		protected function preInit($args = false) {
 
 			$this->postSave();
 
 			//Metas
 			if($this->getMetaTable() && (!isset($this->metas) || !$this->metas)) {
-				$this->metas = new \stdClass();
+				$this->metas = new stdClass();
 			}
 
 			//Args
@@ -316,7 +471,7 @@
 					try {
 
 						$this->fetchMetas(is_array($metas) ? $metas : null);
-					} catch (\Exception $e) {
+					} catch(Exception $e) {
 					}
 				}
 
@@ -355,22 +510,22 @@
 
 									$this->$entity = call_user_func("{$plural_class}::{$method}" . ucwords($this->getSingularClass()), $this->id, is_array($value) ? $value : []);
 								}
-							} catch(\Exception $e) {}
+							} catch(Exception $e) {
+							}
 						}
 					}
 				}
-
-				return $args;
-
-			} else {
-
-				return $args;
 			}
+			return $args;
 		}
 
+		/**
+		 * @param array $args
+		 * @return void
+		 */
 		public function expand(array $args) {
 
-			foreach ($args as $prop => $opts) {
+			foreach($args as $prop => $opts) {
 
 				$local = get_item($opts, 'local', 'id');
 				$foreign = get_item($opts, 'foreign');
@@ -387,8 +542,19 @@
 		/* Meta Model */
 		/* -------------------------------------------------------------------------------------- */
 
+		/**
+		 * @param array|null $metas
+		 * @return void
+		 * @throws Exception
+		 */
 		public function fetchMetas(?array $metas = null) { $this->getMetas($metas); }
 
+		/**
+		 * @param string $name
+		 * @param mixed  $default
+		 * @return mixed
+		 * @throws Exception
+		 */
 		public function getMeta(string $name, $default = '') {
 
 			$dbh = static::getDBHandler();
@@ -398,7 +564,8 @@
 			$meta_id = $this->getMetaId();
 
 			try {
-				$sql = "SELECT `value` FROM `{$meta_table}` WHERE `{$meta_id}` = :id AND `name` = :name";
+				$sql = /** @lang text */
+					"SELECT `value` FROM `{$meta_table}` WHERE `{$meta_id}` = :id AND `name` = :name";
 				$stmt = $dbh->prepare($sql);
 				$stmt->bindValue(':id', $this->id);
 				$stmt->bindValue(':name', $name);
@@ -406,24 +573,27 @@
 				if($row = $stmt->fetch()) {
 
 					$ret = @unserialize($row->value);
-					if ($ret === false) {
+					if($ret === false) {
 						$ret = $row->value;
 					}
 
-					if(isset($this->metas) && is_object($this->metas)) {
-						$this->metas->$name = $ret;
-					} else {
-						$this->metas = new \stdClass();
-						$this->metas->$name = $ret;
+					if(!isset($this->metas) || !is_object($this->metas)) {
+						$this->metas = new stdClass();
 					}
+					$this->metas->$name = $ret;
 				}
-			} catch (PDOException $e) {
-				throw new \Exception("CROOD Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}");
+			} catch(PDOException $e) {
 				error_log("CROOD Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}");
+				throw new Exception("CROOD Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}");
 			}
 			return $ret;
 		}
 
+		/**
+		 * @param array|null $default_metas
+		 * @return object
+		 * @throws Exception
+		 */
 		public function getMetas(?array $default_metas = null) {
 
 			$dbh = static::getDBHandler();
@@ -441,7 +611,8 @@
 			}
 
 			try {
-				$sql = "SELECT `name`, `value` FROM `{$meta_table}` WHERE {$condition}";
+				$sql = /** @lang text */
+					"SELECT `name`, `value` FROM `{$meta_table}` WHERE {$condition}";
 				$stmt = $dbh->prepare($sql);
 				$stmt->bindValue(':id', $this->id);
 				$stmt->execute();
@@ -450,7 +621,7 @@
 				foreach($metas as $meta) {
 
 					$ret[$meta->name] = @unserialize($meta->value);
-					if ($ret[$meta->name] === false) {
+					if($ret[$meta->name] === false) {
 						$ret[$meta->name] = $meta->value;
 					}
 				}
@@ -463,16 +634,22 @@
 					}
 
 				} else {
-					$this->metas = (object) $ret;
+					$this->metas = (object)$ret;
 				}
 
-			} catch (PDOException $e) {
-				throw new \Exception("CROOD Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}");
+			} catch(PDOException $e) {
+				throw new Exception("CROOD Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}");
 			}
-			return (object) $ret;
+			return (object)$ret;
 		}
 
-		public function updateMeta($name, $value) {
+		/**
+		 * @param $name
+		 * @param $value
+		 * @return bool
+		 * @throws Exception
+		 */
+		public function updateMeta($name, $value): bool {
 
 			$dbh = static::getDBHandler();
 			$ret = false;
@@ -480,35 +657,39 @@
 			$meta_table = $this->getMetaTable();
 			$meta_id = $this->getMetaId();
 
-			if ( is_array($value) || is_object($value) ) {
+			if(is_array($value) || is_object($value)) {
 				$value = serialize($value);
 			}
 
 			try {
-				$sql = "INSERT INTO `{$meta_table}` (id, {$meta_id}, value, name) VALUES (0, :meta_id, :value, :name) ON DUPLICATE KEY UPDATE `value` = :value";
+				$sql = /** @lang text */
+					"INSERT INTO `{$meta_table}` (id, {$meta_id}, value, name) VALUES (0, :meta_id, :value, :name) ON DUPLICATE KEY UPDATE `value` = :value";
 				$stmt = $dbh->prepare($sql);
 				$stmt->bindValue(':meta_id', $this->id);
 				$stmt->bindValue(':value', $value);
 				$stmt->bindValue(':name', $name);
 				$stmt->execute();
 
-				if(isset($this->metas) && is_object($this->metas)) {
-					$this->metas->$name = $value;
-				} else {
-					$this->metas = new \stdClass();
-					$this->metas->$name = $value;
+				if(!isset($this->metas) || !is_object($this->metas)) {
+					$this->metas = new stdClass();
 				}
+				$this->metas->$name = $value;
 
 				if($dbh->lastInsertId()) {
 					$ret = true;
 				}
-			} catch (PDOException $e) {
-				throw new \Exception("CROOD Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}");
+			} catch(PDOException $e) {
+				throw new Exception("CROOD Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}");
 			}
 			return $ret;
 		}
 
-		public function updateMetas($metas) {
+		/**
+		 * @param $metas
+		 * @return bool
+		 * @throws Exception
+		 */
+		public function updateMetas($metas): bool {
 
 			$ret = false;
 
@@ -526,5 +707,4 @@
 		}
 	}
 
-	trait SoftDelete {}
-?>
+	trait SoftDelete { }

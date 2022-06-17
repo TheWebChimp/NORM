@@ -15,59 +15,99 @@
 	include 'utilities.inc.php';
 
 	use Dabbie\Dabbie;
-	use \PDO;
+	use Exception;
+	use PDO;
+	use PDOException;
 
 	class NORM {
 
+		/**
+		 * @var
+		 */
 		protected static $table;
+		/**
+		 * @var
+		 */
 		protected static $table_fields;
+		/**
+		 * @var
+		 */
 		protected static $singular_class_name;
+		/**
+		 * @var
+		 */
 		protected static $plural_class_name;
+		/**
+		 * @var
+		 */
 		protected static $db_handler;
 
+		/**
+		 * @var
+		 */
 		protected static $log_level;
 
+		/**
+		 * @param $level
+		 * @return void
+		 */
 		public static function setLogLevel($level) { static::$log_level = $level; }
 
 		/**
 		 * Returns the class table name
 		 *
 		 * @return string $conditions   table name
+		 * @throws Exception
 		 */
-		public static function getTable() {
+		public static function getTable(): string {
 			return static::$table ?? tableize(static::getSingular());
 		}
 
+		/**
+		 * @return mixed
+		 */
 		public static function getTableFields() {
 
 			$singular = static::getSingular();
 			if(class_exists($singular)) {
 
 				$singular = new $singular;
-				$table_fields = $singular->getTableFields();
-				return $table_fields;
+				return $singular->getTableFields();
 			}
 
 			return static::$table_fields;
 		}
 
+		/**
+		 * @return mixed
+		 */
 		public static function getSingular() {
 
 			return static::$singular_class_name ?? singularize(get_called_class());
 		}
 
-		public static function getPlural() { return static::$plural_class_name ?? get_class(); }
+		/**
+		 * @return string
+		 */
+		public static function getPlural(): string { return static::$plural_class_name ?? get_class(); }
 
-		public static function checkSoftDelete() {
+		/**
+		 * @return bool
+		 */
+		public static function checkSoftDelete(): bool {
 			return in_array('NORM\SoftDelete', class_uses(self::getSingular()));
 		}
 
+		/**
+		 * @param Dabbie $handler
+		 * @return void
+		 */
 		public static function setDBHandler(Dabbie $handler) { static::$db_handler = $handler; }
 
 		/**
 		 * Gets the database handler to connect
 		 *
-		 * @return string $dbh  PDO Database Handler (From Dabbie)
+		 * @return mixed $dbh  PDO Database Handler (From Dabbie)
 		 */
 		public static function getDBHandler() {
 
@@ -75,13 +115,13 @@
 		}
 
 		/**
-		 * The al'mighty magic __callStatic function
+		 * The almighty magic __callStatic function
 		 *
-		 * @param  string $method  Name of the method called
-		 * @param  array $params   Non-asociative array with the params from called methos
-		 * @return mixed           Return values depending on the method called
+		 * @param string $method Name of the method called
+		 * @param array  $params Non-associative array with the params from called methods
+		 * @return mixed         Return values depending on the method called
 		 */
-		public static function __callStatic($method, $params) {
+		public static function __callStatic(string $method, array $params) {
 
 			$ret = false;
 			$matches = [];
@@ -112,6 +152,8 @@
 						$conditions = "`{$field}` = '{$params[0]}'";
 					break;
 					case 'LIKE':
+					case 'NOT REGEXP':
+					case 'REGEXP':
 					case 'NOT LIKE':
 						$conditions = "`{$field}` {$type} '{$params[0]}'";
 					break;
@@ -125,10 +167,6 @@
 						$conditions = "`{$field}` {$type} ('{$params[0]}' AND '{$params[1]}')";
 						# Shift the index up
 						$params_index = 2;
-					break;
-					case 'REGEXP':
-					case 'NOT REGEXP':
-						$conditions = "`{$field}` {$type} '{$params[0]}'";
 					break;
 					default:
 						$conditions = '';
@@ -171,12 +209,13 @@
 		}
 
 		/**
-		 * Retrieve one element from the database depending the conditions
+		 * Retrieve one element from the database depending on the conditions
 		 *
-		 * @param  array $options  List of options intended to modify the query behavior
+		 * @param array $options List of options intended to modify the query behavior
 		 * @return array           Array with User objects, False on error
+		 * @throws Exception
 		 */
-		public static function get($options = []) {
+		public static function get(array $options = []) {
 
 			$ret = false;
 
@@ -190,16 +229,16 @@
 		/**
 		 * Return the number of elements depending on the conditions
 		 *
-		 * @param  string $id  Condition for the counting query
+		 * @param int  $conditions
+		 * @param bool $table
 		 * @return string      Number of counted elements
+		 * @throws Exception
 		 */
-		public static function count($conditions = 1, $table = false) {
+		public static function count(int $conditions = 1, bool $table = false): string {
 
 			$dbh = self::getDBHandler();
-			$ret = 0;
 
 			$conditions = $conditions ?: 1;
-
 
 			$conditions = is_array($conditions) ? array_filter($conditions) : $conditions;
 
@@ -225,29 +264,31 @@
 				$stmt->execute();
 				$ret = $stmt->fetch(PDO::FETCH_COLUMN);
 			} catch (PDOException $e) {
-				throw new \Exception("NORM Database error in NORM::count: {$e->getCode()}");
+				throw new Exception("NORM Database error in NORM::count: {$e->getCode()}");
 			}
 			return $ret;
 		}
 
 		/**
-		 * Retrieve all the elements from the database depending the conditions
+		 * Retrieve all the elements from the database depending on the conditions
 		 *
-		 * @param  array $options  List of options intended to modify the query behavior
+		 * @param array $options List of options intended to modify the query behavior
 		 * @return array           Array with User objects, False on error
+		 * @throws Exception
 		 */
-		public static function all($options = []) {
+		public static function all(array $options = []): array {
 
 			$dbh = self::getDBHandler();
-			$ret = [];
 
 			# Generals
 			$table = 		get_item($options, 'table', self::getTable());
 			$table_fields = get_item($options, 'table_fields', self::getTableFields());
 			$class_name = 	get_item($options, 'class_name', self::getSingular());
 
+			$ids = 			get_item($options, 'ids');
+
 			if(!$table || !$table_fields) {
-				throw new \Exception('NORM Parameter Error: Missing table, table_fields and/or class_name.');
+				throw new Exception('NORM Parameter Error: Missing table, table_fields and/or class_name.');
 			}
 
 			$table_fields = is_string($table_fields) ? explode(',', $table_fields) : $table_fields;
@@ -279,7 +320,7 @@
 				# Sanity checks
 
 				if(is_array($by) && is_array($sort) && count($by) != count($sort)) {
-					throw new \Exception('NORM Parameter Error: sort and by are array but they have different lengths.');
+					throw new Exception('NORM Parameter Error: sort and by are array but they have different lengths.');
 				}
 
 				if(is_string($by)) {
@@ -316,15 +357,15 @@
 				$group =	in_array($group, $table_fields) ? $group : false;
 
 				if ($by === false || $sort === false || $offset === false || $show === false) {
-					throw new \Exception('NORM Parameter Error: sort, by, offset or show not well defined.');
+					throw new Exception('NORM Parameter Error: sort, by, offset or show not well defined.');
 				}
 
 				if($group) {
 					if(!in_array($group, $table_fields)) {
-						throw new \Exception('NORM Parameter Error: group not well defined.');
+						throw new Exception('NORM Parameter Error: group not well defined.');
 					}
 
-					$group = $group ? "GROUP BY {$group}" : '';
+					$group = "GROUP BY {$group}";
 				}
 
 				if(is_array($conditions)) {
@@ -342,8 +383,6 @@
 				}
 
 				# By / Sort
-
-				$by_sort = '';
 
 				if(is_array($by)) {
 
@@ -395,12 +434,13 @@
 
 				$clean_query_fields = querify($clean_query_fields, 'escape');
 
-				$sql = $query ? $query : "SELECT {$clean_query_fields} FROM `{$table}` {$conditions} {$group} ORDER BY {$by_sort} LIMIT {$offset}, {$show}";
+				if($ids) $clean_query_fields = '`id`';
+
+				$sql = $query ?: "SELECT {$clean_query_fields} FROM `{$table}` {$conditions} {$group} ORDER BY {$by_sort} LIMIT {$offset}, {$show}";
 
 				if($debug) echo $sql;
 
 				if(static::$log_level == 1) { error_log($sql); }
-
 
 				$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
@@ -408,34 +448,38 @@
 				$stmt->execute();
 
 				if(class_exists($class_name)) {
-					$stmt->setFetchMode(PDO::FETCH_CLASS, $class_name, [$pdoargs]);
+
+					if($ids) $stmt->setFetchMode(PDO::FETCH_COLUMN, 0);
+					else $stmt->setFetchMode(PDO::FETCH_CLASS, $class_name, [$pdoargs]);
 				}
 
 				$ret = $stmt->fetchAll();
 
-				$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
+				if(!$ids) {
 
-				if($query_fields = get_item($options, 'query_fields')) {
+					$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 
-					if(is_string($query_fields)) $query_fields = explode(',', $query_fields);
-					$query_fields = array_map('trim', $query_fields);
+					if($query_fields = get_item($options, 'query_fields')) {
 
-					array_map(function($item) use($query_fields) {
+						if(is_string($query_fields)) $query_fields = explode(',', $query_fields);
+						$query_fields = array_map('trim', $query_fields);
 
-						foreach($item as $k => $v) {
-							if($k == 'metas') continue;
+						array_map(function($item) use($query_fields) {
 
-							if(!in_array($k, $query_fields)) {
-								unset($item->{$k});
+							foreach($item as $k => $v) {
+								if($k == 'metas') continue;
+
+								if(!in_array($k, $query_fields)) {
+									unset($item->{$k});
+								}
 							}
-						}
-					}, $ret);
+						}, $ret);
+					}
 				}
 
 			} catch (PDOException $e) {
-				throw new \Exception("NORM Database error: {$e->getCode()}");
+				throw new Exception("NORM Database error: {$e->getCode()}");
 			}
 			return $ret;
 		}
 	}
-?>
