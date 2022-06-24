@@ -115,11 +115,21 @@
 				$r = new \ReflectionMethod($plural, $name);
 				$params = $r->getParameters();
 
-				// Check if the first parameter receives the id for the
-				if(isset($params[0]) && $params[0]->getName() == 'id_' . strtolower($singular)) {
+				if(isset($params[0])) {
 
-					return call_user_func_array("{$plural}::{$name}", [$this->id, ...$arguments]);
+					// Check if the first parameter receives the id for the
+					if($params[0]->getName() == 'id_' . strtolower($singular)) {
+
+						return call_user_func_array("{$plural}::{$name}", [$this->id, ...$arguments]);
+					}
+
+					// Check if first parameter is a property inside the called class
+					if(in_array($params[0]->getName(), $this->table_fields)) {
+
+						return call_user_func_array("{$plural}::{$name}", [$this->{$params[0]->getName()}, ...$arguments]);
+					}
 				}
+
 			} else {
 
 				throw new Exception("CROOD Magic function: The function `{$name}` does not exists in class: {$plural}");
