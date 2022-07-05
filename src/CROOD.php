@@ -620,6 +620,35 @@
 			return $ret;
 		}
 
+		public function meta(string $name, $default = '') {
+
+			$dbh = static::getDBHandler();
+			$ret = $default;
+
+			$meta_table = $this->getMetaTable();
+			$meta_id = $this->getMetaId();
+
+			try {
+				$sql = /** @lang text */
+					"SELECT `value` FROM `{$meta_table}` WHERE `{$meta_id}` = :id AND `name` = :name";
+				$stmt = $dbh->prepare($sql);
+				$stmt->bindValue(':id', $this->id);
+				$stmt->bindValue(':name', $name);
+				$stmt->execute();
+				if($row = $stmt->fetch()) {
+
+					$ret = @unserialize($row->value);
+					if($ret === false) {
+						$ret = $row->value;
+					}
+				}
+			} catch(PDOException $e) {
+				error_log("CROOD Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}");
+				throw new Exception("CROOD Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}");
+			}
+			return $ret;
+		}
+
 		/**
 		 * @param array|null $default_metas
 		 * @return object

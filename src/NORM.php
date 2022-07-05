@@ -114,6 +114,35 @@
 			return static::$db_handler ? static::$db_handler->getHandler() : null;
 		}
 
+		public static function meta($id_entity, $entity, string $name, $default = '') {
+
+			$dbh = static::getDBHandler();
+			$ret = $default;
+
+			$meta_table = "{$entity}_meta";
+			$meta_id = "id_{$entity}";
+
+			try {
+				$sql = /** @lang text */
+					"SELECT `value` FROM `{$meta_table}` WHERE `{$meta_id}` = :id AND `name` = :name";
+				$stmt = $dbh->prepare($sql);
+				$stmt->bindValue(':id', $id_entity);
+				$stmt->bindValue(':name', $name);
+				$stmt->execute();
+				if($row = $stmt->fetch()) {
+
+					$ret = @unserialize($row->value);
+					if($ret === false) {
+						$ret = $row->value;
+					}
+				}
+			} catch(PDOException $e) {
+				error_log("NORM Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}");
+				throw new Exception("NORM Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}");
+			}
+			return $ret;
+		}
+
 		/**
 		 * The almighty magic __callStatic function
 		 *
