@@ -1,7 +1,7 @@
 {
   "name": "webchimp/norm",
   "description": "Your favorite ORM and CrUD tools",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "type": "library",
   "license": "MIT",
   "authors": [

@@ -477,12 +477,18 @@
 				// Magic functions
 				foreach($args as $key => $value) {
 
+					// Magic function with args
 					if(is_array($value) && is_string($value[0]) && is_callable([$this, $value[0]])) {
-
 						try {
 							$method = $value[0];
 							array_shift($value);
 							$this->$key = call_user_func_array([$this, $method], $value);
+						} catch(Exception $e) { }
+
+					// Magic function without args
+					} else if(is_string($value) && is_callable([$this, $value])) {
+						try {
+							$this->$key = call_user_func_array([$this, $value], []);
 						} catch(Exception $e) { }
 					}
 				}
