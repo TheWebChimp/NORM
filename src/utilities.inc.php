@@ -3,12 +3,12 @@
 	if(!function_exists('print_a')) {
 		/**
 		 * Pretty print for <pre>
-		 * @param $a
+		 * @param $object
 		 * @return void
 		 */
-		function print_a($a) {
+		function print_a($object) {
 			print('<pre>');
-			print_r($a);
+			print_r($object);
 			print('</pre>');
 		}
 	}
@@ -70,26 +70,30 @@
 			$fields = is_string($fields) ? explode(',', $fields) : $fields;
 			$fields = array_map('trim', $fields);
 
-			if($action == 'escape') {
-				foreach($fields as $field) {
-					$ret[] = "`{$field}`";
-				}
-			} else if($action == 'string') {
-				foreach($fields as $field) {
-					$ret[] = "'{$field}'";
-				}
-			} else if($action == 'bind') {
-				foreach($fields as $field) {
-					$ret[] = ":{$field}";
-				}
-			} else if($action == 'param') {
-				foreach($fields as $field) {
-
-					if($field == 'modified') $ret[] = "`{$field}` = NOW()";
-					else                        $ret[] = "`{$field}` = :{$field}";
-				}
-			} else {
-				$ret = $fields;
+			switch($action) {
+				case 'escape':
+					foreach($fields as $field) {
+						$ret[] = "`{$field}`";
+					}
+					break;
+				case 'string':
+					foreach($fields as $field) {
+						$ret[] = "'{$field}'";
+					}
+					break;
+				case 'bind':
+					foreach($fields as $field) {
+						$ret[] = ":{$field}";
+					}
+					break;
+				case 'param':
+					foreach($fields as $field) {
+						if($field == 'modified') $ret[] = "`{$field}` = NOW()";
+						else $ret[] = "`{$field}` = :{$field}";
+					}
+					break;
+				default:
+					$ret = $fields;
 			}
 
 			return implode(', ', $ret);

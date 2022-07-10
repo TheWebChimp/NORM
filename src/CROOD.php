@@ -119,8 +119,8 @@
 
 			if(method_exists($plural, $name)) {
 
-				$r = new ReflectionMethod($plural, $name);
-				$params = $r->getParameters();
+				$reflection = new ReflectionMethod($plural, $name);
+				$params = $reflection->getParameters();
 
 				if(isset($params[0])) {
 
@@ -136,11 +136,9 @@
 						return call_user_func_array("{$plural}::{$name}", [$this->{$params[0]->getName()}, ...$arguments]);
 					}
 				}
-
-			} else {
-
-				throw new Exception("CROOD Magic function: The function `{$name}` does not exists in class: {$plural}");
 			}
+
+			throw new Exception("CROOD Magic function: The function `{$name}` does not exists in class: {$plural}");
 		}
 
 		/**
