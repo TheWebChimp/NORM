@@ -18,6 +18,7 @@
 	use Dabbie\Dabbie;
 	use Exception;
 	use PDOException;
+	use ReflectionMethod;
 	use stdClass;
 
 	/**
@@ -30,7 +31,7 @@
 		/**
 		 * @var string
 		 */
-		protected $table;
+		protected string $table;
 		/**
 		 * @var array
 		 */
@@ -55,11 +56,11 @@
 		/**
 		 * @var string
 		 */
-		protected $singular_class_name;
+		protected string $singular_class_name;
 		/**
 		 * @var string
 		 */
-		protected $plural_class_name;
+		protected string $plural_class_name;
 
 		/**
 		 * @var
@@ -69,22 +70,22 @@
 		/**
 		 * @var int
 		 */
-		public $id;
+		public int $id;
 
 		# Meta Model
 		/**
-		 * @var
+		 * @var string
 		 */
-		protected $meta_id;
+		protected string $meta_id;
 		/**
-		 * @var
+		 * @var string
 		 */
-		protected $meta_table;
+		protected string $meta_table;
 
 		/**
 		 * @return array
 		 */
-		public function __debugInfo() {
+		public function __debugInfo(): array {
 
 			$result = get_object_vars($this);
 			unset($result['table']);
@@ -103,6 +104,12 @@
 			return $result;
 		}
 
+		/**
+		 * @param $name
+		 * @param $arguments
+		 * @return mixed|void
+		 * @throws Exception
+		 */
 		public function __call($name, $arguments) {
 
 			$singular = $this->getSingularClass();
@@ -112,7 +119,7 @@
 
 			if(method_exists($plural, $name)) {
 
-				$r = new \ReflectionMethod($plural, $name);
+				$r = new ReflectionMethod($plural, $name);
 				$params = $r->getParameters();
 
 				if(isset($params[0])) {
@@ -472,8 +479,6 @@
 
 				$args = $args[0];
 
-				$plural = $this->getPluralClass();
-
 				// Magic functions
 				foreach($args as $key => $value) {
 
@@ -483,13 +488,15 @@
 							$method = $value[0];
 							array_shift($value);
 							$this->$key = call_user_func_array([$this, $method], $value);
-						} catch(Exception $e) { }
+						} catch(Exception $e) {
+						}
 
-					// Magic function without args
+						// Magic function without args
 					} else if(is_string($value) && is_callable([$this, $value])) {
 						try {
 							$this->$key = call_user_func_array([$this, $value], []);
-						} catch(Exception $e) { }
+						} catch(Exception $e) {
+						}
 					}
 				}
 
@@ -503,7 +510,8 @@
 
 					try {
 						$this->fetchMetas(is_array($metas) ? $metas : null);
-					} catch(Exception $e) { }
+					} catch(Exception $e) {
+					}
 				}
 
 				// Dynamic Fetch
@@ -620,6 +628,12 @@
 			return $ret;
 		}
 
+		/**
+		 * @param string $name
+		 * @param mixed  $default
+		 * @return mixed
+		 * @throws Exception
+		 */
 		public function meta(string $name, $default = '') {
 
 			$dbh = static::getDBHandler();
@@ -767,4 +781,7 @@
 		}
 	}
 
+	/**
+	 *
+	 */
 	trait SoftDelete { }

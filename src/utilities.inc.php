@@ -16,8 +16,8 @@
 	if(!function_exists('get_item')) {
 		/**
 		 * Gets an item from an array or object, if not found, returns a default or empty string
-		 * @param $var
-		 * @param $key
+		 * @param       $var
+		 * @param       $key
 		 * @param mixed $default
 		 * @return mixed
 		 */
@@ -54,7 +54,7 @@
 		 */
 		function snake_to_camel(string $val): string {
 			$val = str_replace(' ', '', ucwords(str_replace('_', ' ', $val)));
-			return strtolower(substr($val, 0, 1)).substr($val, 1);
+			return strtolower(substr($val, 0, 1)) . substr($val, 1);
 		}
 	}
 
@@ -70,25 +70,27 @@
 			$fields = is_string($fields) ? explode(',', $fields) : $fields;
 			$fields = array_map('trim', $fields);
 
-			if ($action == 'escape') {
-				foreach ($fields as $field) {
+			if($action == 'escape') {
+				foreach($fields as $field) {
 					$ret[] = "`{$field}`";
 				}
-			} else if ($action == 'string') {
-				foreach ($fields as $field) {
+			} else if($action == 'string') {
+				foreach($fields as $field) {
 					$ret[] = "'{$field}'";
 				}
-			} else if ($action == 'bind') {
-				foreach ($fields as $field) {
+			} else if($action == 'bind') {
+				foreach($fields as $field) {
 					$ret[] = ":{$field}";
 				}
 			} else if($action == 'param') {
-				foreach ($fields as $field) {
+				foreach($fields as $field) {
 
-					if($field == 'modified') 	$ret[] = "`{$field}` = NOW()";
-					else 						$ret[] = "`{$field}` = :{$field}";
+					if($field == 'modified') $ret[] = "`{$field}` = NOW()";
+					else                        $ret[] = "`{$field}` = :{$field}";
 				}
-			} else { $ret = $fields; }
+			} else {
+				$ret = $fields;
+			}
 
 			return implode(', ', $ret);
 		}
@@ -104,10 +106,10 @@
 
 			if($plural !== null) return $plural;
 
-			$last_letter = strtolower($singular[strlen($singular)-1]);
+			$last_letter = strtolower($singular[strlen($singular) - 1]);
 			switch($last_letter) {
 				case 'y':
-					return substr($singular,0,-1) . 'ies';
+					return substr($singular, 0, -1) . 'ies';
 				case 's':
 					return $singular . 'es';
 				default:
@@ -122,13 +124,13 @@
 		 * @return mixed
 		 */
 		function singularize($params) {
-			if (is_string($params)) {
+			if(is_string($params)) {
 				$word = $params;
-			} else if (!$word = $params['word']) {
+			} else if(!$word = $params['word']) {
 				return false;
 			}
 
-			$singular = array (
+			$singular = array(
 				'/(quiz)zes$/i' => '\\1',
 				'/(matr)ices$/i' => '\\1ix',
 				'/(vert|ind)ices$/i' => '\\1ex',
@@ -177,20 +179,20 @@
 			);
 
 			$lower_word = strtolower($word);
-			foreach ($ignore as $ignore_word) {
-				if (substr($lower_word, (-1 * strlen($ignore_word))) == $ignore_word) {
+			foreach($ignore as $ignore_word) {
+				if(substr($lower_word, (-1 * strlen($ignore_word))) == $ignore_word) {
 					return $word;
 				}
 			}
 
-			foreach ($irregular as $singular_word => $plural_word) {
-				if (preg_match('/('.$plural_word.')$/i', $word, $arr)) {
-					return preg_replace('/('.$plural_word.')$/i', substr($arr[0],0,1).substr($singular_word,1), $word);
+			foreach($irregular as $singular_word => $plural_word) {
+				if(preg_match('/(' . $plural_word . ')$/i', $word, $arr)) {
+					return preg_replace('/(' . $plural_word . ')$/i', substr($arr[0], 0, 1) . substr($singular_word, 1), $word);
 				}
 			}
 
-			foreach ($singular as $rule => $replacement) {
-				if (preg_match($rule, $word)) {
+			foreach($singular as $rule => $replacement) {
+				if(preg_match($rule, $word)) {
 					return preg_replace($rule, $replacement, $word);
 				}
 			}
@@ -208,7 +210,7 @@
 		function tableize(string $word): string {
 			$tableized = preg_replace('~(?<=\\w)([A-Z])~u', '_$1', $word);
 
-			if ($tableized === null) {
+			if($tableized === null) {
 				throw new Exception(sprintf('preg_replace returned null for value "%s"', $word));
 			}
 
