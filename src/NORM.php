@@ -513,11 +513,11 @@
 
 						array_map(function($item) use ($query_fields) {
 
-							foreach($item as $k => $v) {
-								if($k == 'metas') continue;
+							foreach($item as $key => $value) {
+								if($key == 'metas') continue;
 
-								if(!in_array($k, $query_fields)) {
-									unset($item->{$k});
+								if(!in_array($key, $query_fields)) {
+									unset($item->{$key});
 								}
 							}
 						}, $ret);
