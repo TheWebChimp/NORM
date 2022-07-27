@@ -18,7 +18,6 @@
 	use Dabbie\Dabbie;
 	use Exception;
 	use PDOException;
-	use ReflectionMethod;
 	use stdClass;
 
 	/**
@@ -31,7 +30,7 @@
 		/**
 		 * @var string
 		 */
-		protected string $table;
+		protected $table;
 		/**
 		 * @var array
 		 */
@@ -56,11 +55,11 @@
 		/**
 		 * @var string
 		 */
-		protected string $singular_class_name;
+		protected $singular_class_name;
 		/**
 		 * @var string
 		 */
-		protected string $plural_class_name;
+		protected $plural_class_name;
 
 		/**
 		 * @var
@@ -70,22 +69,22 @@
 		/**
 		 * @var int
 		 */
-		public int $id;
+		public $id;
 
 		# Meta Model
 		/**
-		 * @var string
+		 * @var
 		 */
-		protected string $meta_id;
+		protected $meta_id;
 		/**
-		 * @var string
+		 * @var
 		 */
-		protected string $meta_table;
+		protected $meta_table;
 
 		/**
 		 * @return array
 		 */
-		public function __debugInfo(): array {
+		public function __debugInfo() {
 
 			$result = get_object_vars($this);
 			unset($result['table']);
@@ -104,12 +103,6 @@
 			return $result;
 		}
 
-		/**
-		 * @param $name
-		 * @param $arguments
-		 * @return mixed|void
-		 * @throws Exception
-		 */
 		public function __call($name, $arguments) {
 
 			$singular = $this->getSingularClass();
@@ -119,8 +112,8 @@
 
 			if(method_exists($plural, $name)) {
 
-				$reflection = new ReflectionMethod($plural, $name);
-				$params = $reflection->getParameters();
+				$r = new \ReflectionMethod($plural, $name);
+				$params = $r->getParameters();
 
 				if(isset($params[0])) {
 
@@ -137,9 +130,10 @@
 					}
 				}
 
-			}
+			} else {
 
-			throw new Exception("CROOD Magic function: The function `{$name}` does not exists in class: {$plural}");
+				throw new Exception("CROOD Magic function: The function `{$name}` does not exists in class: {$plural}");
+			}
 		}
 
 		/**
@@ -626,12 +620,6 @@
 			return $ret;
 		}
 
-		/**
-		 * @param string $name
-		 * @param mixed  $default
-		 * @return mixed
-		 * @throws Exception
-		 */
 		public function meta(string $name, $default = '') {
 
 			$dbh = static::getDBHandler();
