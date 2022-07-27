@@ -136,6 +136,7 @@
 						return call_user_func_array("{$plural}::{$name}", [$this->{$params[0]->getName()}, ...$arguments]);
 					}
 				}
+
 			}
 
 			throw new Exception("CROOD Magic function: The function `{$name}` does not exists in class: {$plural}");
@@ -477,24 +478,24 @@
 
 				$args = $args[0];
 
+				$plural = $this->getPluralClass();
+
 				// Magic functions
 				foreach($args as $key => $value) {
 
 					// Magic function with args
-					if(is_array($value) && isset($value[0]) && $value[0] && is_string($value[0]) && is_callable([$this, $value[0]])) {
+					if(is_array($value) && isset($value[0]) && !!$value[0] && is_string($value[0]) && is_callable([$this, $value[0]])) {
 						try {
 							$method = $value[0];
 							array_shift($value);
 							$this->$key = call_user_func_array([$this, $method], $value);
-						} catch(Exception $e) {
-						}
+						} catch(Exception $e) { }
 
-						// Magic function without args
+					// Magic function without args
 					} else if(is_string($value) && is_callable([$this, $value])) {
 						try {
 							$this->$key = call_user_func_array([$this, $value], []);
-						} catch(Exception $e) {
-						}
+						} catch(Exception $e) { }
 					}
 				}
 
@@ -508,8 +509,7 @@
 
 					try {
 						$this->fetchMetas(is_array($metas) ? $metas : null);
-					} catch(Exception $e) {
-					}
+					} catch(Exception $e) { }
 				}
 
 				// Dynamic Fetch
@@ -779,7 +779,4 @@
 		}
 	}
 
-	/**
-	 *
-	 */
 	trait SoftDelete { }
