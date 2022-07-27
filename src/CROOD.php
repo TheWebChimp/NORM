@@ -481,7 +481,7 @@
 				foreach($args as $key => $value) {
 
 					// Magic function with args
-					if(is_array($value) && is_string($value[0]) && is_callable([$this, $value[0]])) {
+					if(is_array($value) && isset($value[0]) && is_string($value[0]) && is_callable([$this, $value[0]])) {
 						try {
 							$method = $value[0];
 							array_shift($value);
