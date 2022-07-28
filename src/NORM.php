@@ -137,8 +137,8 @@
 					}
 				}
 			} catch(PDOException $e) {
-				error_log("NORM Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}");
-				throw new Exception("NORM Database error: {$e->getCode()} (Line {$e->getLine()}) in " . $this->getSingularClass() . "::" . __FUNCTION__ . ": {$e->getMessage()}");
+				error_log("NORM Database error in meta(): {$e->getCode()} (Line {$e->getLine()}) in " . __FUNCTION__ . ": {$e->getMessage()}");
+				throw new Exception("NORM Database error in meta(): {$e->getCode()} (Line {$e->getLine()}) in " . __FUNCTION__ . ": {$e->getMessage()}\n");
 			}
 			return $ret;
 		}
@@ -293,7 +293,8 @@
 				$stmt->execute();
 				$ret = $stmt->fetch(PDO::FETCH_COLUMN);
 			} catch (PDOException $e) {
-				throw new Exception("NORM Database error in NORM::count: {$e->getCode()}");
+				error_log("NORM Database error count(): {$e->getCode()} (Line {$e->getLine()}) in " . __FUNCTION__ . ": {$e->getMessage()}");
+				throw new Exception("NORM Database error count(): {$e->getCode()} (Line {$e->getLine()}) in " . __FUNCTION__ . ": {$e->getMessage()}");
 			}
 			return $ret;
 		}
@@ -506,8 +507,9 @@
 					}
 				}
 
-			} catch (PDOException $e) {
-				throw new Exception("NORM Database error: {$e->getCode()}");
+			} catch (Exception $e) {
+				error_log("NORM Database error: {$e->getCode()} (Line {$e->getLine()}) in " . __FUNCTION__ . ": {$e->getMessage()}");
+				throw new Exception("NORM Database error: {$e->getCode()} (Line {$e->getLine()}) in " . __FUNCTION__ . ": {$e->getMessage()}\n");
 			}
 			return $ret;
 		}
