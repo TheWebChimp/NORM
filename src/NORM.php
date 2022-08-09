@@ -114,6 +114,36 @@
 			return static::$db_handler ? static::$db_handler->getHandler() : null;
 		}
 
+		public static function updateMeta(int $id_entity, string $entity, string $name, $value) {
+
+			$dbh = static::getDBHandler();
+			$ret = $default;
+
+			$meta_table = "{$entity}_meta";
+			$meta_id = "id_{$entity}";
+
+			try {
+				$sql = /** @lang text */
+					"INSERT INTO `{$meta_table}` (id, {$meta_id}, value, name) VALUES (0, :id, :value, :name) ON DUPLICATE KEY UPDATE `value` = :value";
+				$stmt = $dbh->prepare($sql);
+				$stmt->bindValue(':id', $id_entity);
+				$stmt->bindValue(':name', $name);
+				$stmt->bindValue(':value', $value);
+				$stmt->execute();
+				if($row = $stmt->fetch()) {
+
+					$ret = @unserialize($row->value);
+					if($ret === false) {
+						$ret = $row->value;
+					}
+				}
+			} catch(PDOException $e) {
+				error_log("NORM Database error in updateMeta(): {$e->getCode()} (Line {$e->getLine()}) in " . __FUNCTION__ . ": {$e->getMessage()}");
+				throw new Exception("NORM Database error in updateMeta(): {$e->getCode()} (Line {$e->getLine()}) in " . __FUNCTION__ . ": {$e->getMessage()}\n");
+			}
+			return $ret;
+		}
+
 		public static function meta($id_entity, $entity, string $name, $default = '') {
 
 			$dbh = static::getDBHandler();
