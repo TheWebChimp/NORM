@@ -118,7 +118,7 @@
 				if(isset($params[0])) {
 
 					// Check if the first parameter receives the id for the
-					if($params[0]->getName() == 'id_' . strtolower($singular)) {
+					if($params[0]->getName() == 'id_' . camel_to_snake($singular)) {
 
 						return call_user_func_array("{$plural}::{$name}", [$this->id, ...$arguments]);
 					}
