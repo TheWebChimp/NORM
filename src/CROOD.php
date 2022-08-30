@@ -514,9 +514,9 @@
 
 						$entity = $matches['entity'];
 
-						if($entity != 'metas' && class_exists(ucwords($entity))) {
+						$received_class = ucwords(snake_to_camel($entity));
 
-							$received_class = ucwords($entity);
+						if($entity != 'metas' && class_exists($received_class)) {
 
 							// Singular class
 							if(is_subclass_of($received_class, 'NORM\CROOD')) {
