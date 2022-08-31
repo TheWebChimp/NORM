@@ -144,6 +144,37 @@
 			return $ret;
 		}
 
+		public static function metas($id_entity, $entity) {
+
+			$dbh = static::getDBHandler();
+			$ret = [];
+
+			$meta_table = "{$entity}_meta";
+			$meta_id = "id_{$entity}";
+
+			try {
+				$sql = /** @lang text */
+					"SELECT `name`, `value` FROM `{$meta_table}` WHERE `{$meta_id}` = :id";
+				$stmt = $dbh->prepare($sql);
+				$stmt->bindValue(':id', $id_entity);
+				$stmt->execute();
+				if($rows = $stmt->fetchAll()) {
+					foreach($rows as $row) {
+
+
+						$row_ret = @unserialize($row->value);
+						if($row_ret === false) $row_ret = $row->value;
+
+						$ret[$row->name] = $row_ret;
+					}
+				}
+			} catch(PDOException $e) {
+				error_log("NORM Database error in meta(): {$e->getCode()} (Line {$e->getLine()}) in " . __FUNCTION__ . ": {$e->getMessage()}");
+				throw new Exception("NORM Database error in meta(): {$e->getCode()} (Line {$e->getLine()}) in " . __FUNCTION__ . ": {$e->getMessage()}\n");
+			}
+			return $ret;
+		}
+
 		public static function meta($id_entity, $entity, string $name, $default = '') {
 
 			$dbh = static::getDBHandler();
