@@ -477,18 +477,41 @@
 				// Magic functions
 				foreach($args as $key => $value) {
 
+					//Preparing ladder
+					$ladder_args = $args;
+					$main_ladder_key = '';
+
+					foreach($ladder_args as $arg_key => $arg) {
+
+						if(!$main_ladder_key && $arg == $value) {
+
+							$main_ladder_key = $arg_key;
+
+						} else if(strpos($arg_key, "{$main_ladder_key}.") == 0) {
+
+							$ladder_args[str_replace("{$main_ladder_key}.", '', $arg_key)] = $arg;
+						}
+
+						unset($ladder_args[$arg_key]);
+					}
+
 					// Magic function with args
 					if(is_array($value) && isset($value[0]) && $value[0] && is_string($value[0]) && is_callable([$this, $value[0]])) {
 						try {
 							$method = $value[0];
 							array_shift($value);
-							$this->$key = call_user_func_array([$this, $method], $value);
+
+							$value = array_merge($value[0], [ 'args' => $ladder_args ]);
+
+							$this->$key = call_user_func_array([$this, $method], [$value]);
+
 						} catch(Exception $e) { }
 
 					// Magic function without args
 					} else if(is_string($value) && is_callable([$this, $value])) {
 						try {
-							$this->$key = call_user_func_array([$this, $value], []);
+
+							$this->$key = call_user_func_array([$this, $value], [[ 'args' => $ladder_args ]]);
 						} catch(Exception $e) { }
 					}
 				}

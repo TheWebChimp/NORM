@@ -555,12 +555,16 @@
 						if(is_string($query_fields)) $query_fields = explode(',', $query_fields);
 						$query_fields = array_map('trim', $query_fields);
 
-						array_map(function($item) use($query_fields) {
+
+						//Preparing an array with the keys of all the
+						$pdoargs_keys = array_keys($pdoargs);
+
+						array_map(function($item) use($query_fields, $pdoargs_keys) {
 
 							foreach($item as $k => $v) {
-								if($k == 'metas') continue;
+								if(in_array('fetch_metas', $pdoargs_keys)) continue;
 
-								if(!in_array($k, $query_fields)) {
+								if(!in_array($k, $query_fields) && !in_array($k, $pdoargs_keys)) {
 									unset($item->{$k});
 								}
 							}
