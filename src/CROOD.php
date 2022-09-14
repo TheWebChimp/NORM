@@ -501,9 +501,13 @@
 							$method = $value[0];
 							array_shift($value);
 
-							$value = array_merge($value[0], [ 'args' => $ladder_args ]);
+							if(is_array($value[0])) {
+								$value = array_merge($value[0], [ 'args' => $ladder_args ]);
+								$vale = [$value];
+							}
 
-							$this->$key = call_user_func_array([$this, $method], [$value]);
+
+							$this->$key = call_user_func_array([$this, $method], $value);
 
 						} catch(Exception $e) { }
 
@@ -511,7 +515,9 @@
 					} else if(is_string($value) && is_callable([$this, $value])) {
 						try {
 
-							$this->$key = call_user_func_array([$this, $value], [[ 'args' => $ladder_args ]]);
+							$to_pass = count($ladder_args) ? [ 'args' => $ladder_args ] : [];
+
+							$this->$key = call_user_func_array([$this, $value], [$to_pass]);
 						} catch(Exception $e) { }
 					}
 				}
