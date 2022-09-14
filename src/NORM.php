@@ -523,6 +523,11 @@
 					if(in_array($query_field, $table_fields)) $clean_query_fields[] = $query_field;
 				}
 
+
+				if(!in_array('id', $clean_query_fields)) {
+					array_unshift($clean_query_fields, 'id');
+				}
+
 				$clean_query_fields = querify($clean_query_fields, 'escape');
 
 				if($ids) $clean_query_fields = '`id`';
@@ -562,9 +567,11 @@
 						array_map(function($item) use($query_fields, $pdoargs_keys) {
 
 							foreach($item as $k => $v) {
-								if(in_array('fetch_metas', $pdoargs_keys)) continue;
+
+								if(in_array('fetch_metas', $pdoargs_keys) && $k == 'metas') continue;
 
 								if(!in_array($k, $query_fields) && !in_array($k, $pdoargs_keys)) {
+
 									unset($item->{$k});
 								}
 							}
