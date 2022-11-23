@@ -752,11 +752,12 @@
 
 			try {
 				$sql = /** @lang text */
-					"INSERT INTO `{$meta_table}` (id, {$meta_id}, value, name) VALUES (0, :meta_id, :value, :name) ON DUPLICATE KEY UPDATE `value` = :value";
+					"INSERT INTO `{$meta_table}` (id, `{$meta_id}`, `name`, `value`) VALUES (0, :meta_id, :name, :value) ON DUPLICATE KEY UPDATE `value` = :value_update";
 				$stmt = $dbh->prepare($sql);
 				$stmt->bindValue(':meta_id', $this->id);
-				$stmt->bindValue(':value', $value);
 				$stmt->bindValue(':name', $name);
+				$stmt->bindValue(':value', $value);
+				$stmt->bindValue(':value_update', $value);
 				$stmt->execute();
 
 				if(!isset($this->metas) || !is_object($this->metas)) {
